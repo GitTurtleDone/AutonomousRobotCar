@@ -16,6 +16,7 @@
 #include "soc/rtc_cntl_reg.h"    // disable brownout problems
 #include "esp_http_server.h"
 
+
 // Replace with your network credentials
 const char* ssid = "SPARK-B315-DB3F";
 const char* password = "A2DJG680N80";
@@ -179,8 +180,8 @@ static const char PROGMEM INDEX_HTML[] = R"rawliteral(
     <table>
       <tr><td colspan="3" align="center"><button class="button" onmousedown="toggleCheckbox('forward');" ontouchstart="toggleCheckbox('forward');" onmouseup="toggleCheckbox('stop');" ontouchend="toggleCheckbox('stop');">Forward</button></td></tr>
       <tr><td align="center"><button class="button" onmousedown="toggleCheckbox('left');" ontouchstart="toggleCheckbox('left');" onmouseup="toggleCheckbox('stop');" ontouchend="toggleCheckbox('stop');">Left</button></td><td align="center"><button class="button" onmousedown="toggleCheckbox('stop');" ontouchstart="toggleCheckbox('stop');">Stop</button></td><td align="center"><button class="button" onmousedown="toggleCheckbox('right');" ontouchstart="toggleCheckbox('right');" onmouseup="toggleCheckbox('stop');" ontouchend="toggleCheckbox('stop');">Right</button></td></tr>
-      <tr><td colspan="3" align="center"><button class="button" onmousedown="toggleCheckbox('backward');" ontouchstart="toggleCheckbox('backward');" onmouseup="toggleCheckbox('stop');" ontouchend="toggleCheckbox('stop');">Backward</button></td></tr>   
-      <tr><td colspan="3" align="center"><button class="button" onclick="toggleCheckbox('takePhoto');">Take a photo</button></td></tr>                  
+      <tr><td colspan="3" align="center"><button class="button" onmousedown="toggleCheckbox('backward');" ontouchstart="toggleCheckbox('backward');" onmouseup="toggleCheckbox('stop');" ontouchend="toggleCheckbox('stop');">Backward</button></td></tr>                   
+      <tr><td colspan="3" align="center"><button class="button" onclick="toggleCheckbox('takePhoto');">Take a photo</button></td></tr>
     </table>
    <script>
    function toggleCheckbox(x) {
@@ -220,6 +221,9 @@ static esp_err_t stream_handler(httpd_req_t *req){
       if(fb->width > 400){
         if(fb->format != PIXFORMAT_JPEG){
           bool jpeg_converted = frame2jpg(fb, 80, &_jpg_buf, &_jpg_buf_len);
+          esp_camera_fb_return(fb);
+          fb = NULL;
+          if(!jpeg_converted){
             Serial.println("JPEG compression failed");
             res = ESP_FAIL;
           }
@@ -316,42 +320,27 @@ static esp_err_t cmd_handler(httpd_req_t *req){
     digitalWrite(MOTOR_2_PIN_1, 0);
     digitalWrite(MOTOR_2_PIN_2, 1);
   }
+  else if(!strcmp(variable, "takePhoto")) {
+    
+ 
+    
+ 
+    camera_fb_t * frame = NULL;
+    frame = esp_camera_fb_get();
+ 
+    req->send_P(200, "image/jpeg", (const uint8_t *)frame->buf, frame->len);
+ 
+    esp_camera_fb_return(frame);
+    
+    
+    
+  }
   else if(!strcmp(variable, "stop")) {
     Serial.println("Stop");
     digitalWrite(MOTOR_1_PIN_1, 0);
     digitalWrite(MOTOR_1_PIN_2, 0);
     digitalWrite(MOTOR_2_PIN_1, 0);
     digitalWrite(MOTOR_2_PIN_2, 0);
-  }
-  else if(!strcmp(variable, "takePhoto")) {
-    Serial.println("Image requested.");
-    server.on("/photo", HTTP_GET, [](AsyncWebServerRequest * request) {
- 
-    
-    camera_fb_t* fb = NULL;
-    // Skip first 3 frames (increase/decrease number as needed).
-    for (int i = 0; i < 3; i++) {
-      fb = esp_camera_fb_get();
-      esp_camera_fb_return(fb);
-      fb = NULL;
-    }
-    
-    // Take a new photo
-    fb = NULL;  
-    fb = esp_camera_fb_get();  
-    if(!fb) {
-      Serial.println("Camera capture failed");
-      delay(1000);
-      ESP.restart();
-    }
- 
-    request->send_P(200, "image/jpeg", (const uint8_t *)frame->buf, frame->len);
- 
-    esp_camera_fb_return(fb);
-    });
- 
-    server.begin();
-    
   }
   else {
     res = -1;
@@ -364,8 +353,6 @@ static esp_err_t cmd_handler(httpd_req_t *req){
   httpd_resp_set_hdr(req, "Access-Control-Allow-Origin", "*");
   return httpd_resp_send(req, NULL, 0);
 }
-
-
 
 void startCameraServer(){
   httpd_config_t config = HTTPD_DEFAULT_CONFIG();

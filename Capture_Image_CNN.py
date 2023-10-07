@@ -1,0 +1,53 @@
+# import requests
+
+# # URL of the web server you want to access
+# url = "http://192.168.1.65"  # Replace with the URL you want to access
+
+# # Send an HTTP GET request to the server
+# response = requests.get(url)
+
+# # Check if the request was successful (status code 200)
+# if response.status_code == 200:
+#     print("Request was successful!")
+#     print("Response content:")
+#     print(response.text)
+# else:
+#     print(f"Request failed with status code {response.status_code}")
+
+import cv2
+
+# URL of the video stream (replace with your video source)
+# video_url = "http://192.168.1.65:81/stream"  # Replace with the URL of the video stream
+
+
+
+import http.server
+import socketserver
+import requests
+
+# Define the IP address and port for the server
+host = "192.168.1.65"
+port = 81
+
+# Define the URL of the image you want to download
+image_url = "http://192.168.1.65:81/stream"  # Replace with the URL of the image you want to download
+
+# Create a simple HTTP server that serves a page with the image
+class ImageHandler(http.server.SimpleHTTPRequestHandler):
+    def do_GET(self):
+        if self.path == '/image.jpg':
+            # Download the image and save it to a file
+            response = requests.get(image_url)
+            if response.status_code == 200:
+                with open("downloaded_image.jpg", "wb") as f:
+                    f.write(response.content)
+            self.send_response(200)
+            self.end_headers()
+            self.wfile.write(b"Image downloaded and saved as 'downloaded_image.jpg'")
+        else:
+            super().do_GET()
+
+with socketserver.TCPServer((host, port), ImageHandler) as server:
+    print(f"Serving at http://{host}:{port}")
+    server.serve_forever()
+

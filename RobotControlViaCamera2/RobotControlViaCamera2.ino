@@ -16,6 +16,12 @@
 #include "soc/rtc_cntl_reg.h"    // disable brownout problems
 #include "esp_http_server.h"
 
+typedef struct {
+        httpd_req_t *req;
+        size_t len;
+} jpg_chunking_t;
+
+
 // Replace with your network credentials
 const char* ssid = "SPARK-B315-DB3F";
 const char* password = "A2DJG680N80";
@@ -179,8 +185,10 @@ static const char PROGMEM INDEX_HTML[] = R"rawliteral(
     <table>
       <tr><td colspan="3" align="center"><button class="button" onmousedown="toggleCheckbox('forward');" ontouchstart="toggleCheckbox('forward');" onmouseup="toggleCheckbox('stop');" ontouchend="toggleCheckbox('stop');">Forward</button></td></tr>
       <tr><td align="center"><button class="button" onmousedown="toggleCheckbox('left');" ontouchstart="toggleCheckbox('left');" onmouseup="toggleCheckbox('stop');" ontouchend="toggleCheckbox('stop');">Left</button></td><td align="center"><button class="button" onmousedown="toggleCheckbox('stop');" ontouchstart="toggleCheckbox('stop');">Stop</button></td><td align="center"><button class="button" onmousedown="toggleCheckbox('right');" ontouchstart="toggleCheckbox('right');" onmouseup="toggleCheckbox('stop');" ontouchend="toggleCheckbox('stop');">Right</button></td></tr>
-      <tr><td colspan="3" align="center"><button class="button" onmousedown="toggleCheckbox('backward');" ontouchstart="toggleCheckbox('backward');" onmouseup="toggleCheckbox('stop');" ontouchend="toggleCheckbox('stop');">Backward</button></td></tr>   
-      <tr><td colspan="3" align="center"><button class="button" onclick="toggleCheckbox('takePhoto');">Take a photo</button></td></tr>                  
+      <tr><td colspan="3" align="center"><button class="button" onmousedown="toggleCheckbox('backward');" ontouchstart="toggleCheckbox('backward');" onmouseup="toggleCheckbox('stop');" ontouchend="toggleCheckbox('stop');">Backward</button></td></tr>                   
+      <tr><td colspan="3" align="center"><button class="button" onclick="toggleCheckbox('takePhoto');">Take a photo</button></td><td align="center"><button class="button" onclick="toggleCheckbox('savePhoto');" >Save Photo</button></td></tr>
+      
+      
     </table>
    <script>
    function toggleCheckbox(x) {
@@ -220,6 +228,9 @@ static esp_err_t stream_handler(httpd_req_t *req){
       if(fb->width > 400){
         if(fb->format != PIXFORMAT_JPEG){
           bool jpeg_converted = frame2jpg(fb, 80, &_jpg_buf, &_jpg_buf_len);
+          esp_camera_fb_return(fb);
+          fb = NULL;
+          if(!jpeg_converted){
             Serial.println("JPEG compression failed");
             res = ESP_FAIL;
           }
@@ -259,6 +270,17 @@ static esp_err_t cmd_handler(httpd_req_t *req){
   char*  buf;
   size_t buf_len;
   char variable[32] = {0,};
+
+  // camera_fb_t * fb = NULL;
+  // //esp_err_t res = ESP_OK;
+  // size_t _jpg_buf_len = 0;
+  // uint8_t * _jpg_buf = NULL;
+  // char * part_buf[64];
+
+  camera_fb_t * fb = NULL;
+  //esp_err_t res = ESP_OK;
+  size_t fb_len = 0;
+  int64_t fr_start = esp_timer_get_time();
   
   buf_len = httpd_req_get_url_query_len(req) + 1;
   if (buf_len > 1) {
@@ -316,42 +338,83 @@ static esp_err_t cmd_handler(httpd_req_t *req){
     digitalWrite(MOTOR_2_PIN_1, 0);
     digitalWrite(MOTOR_2_PIN_2, 1);
   }
+  
+  else if(!strcmp(variable, "takePhoto")) {
+    // fb = esp_camera_fb_get();
+    // if (!fb) {
+    //   Serial.println("Camera capture failed");
+    //   res = ESP_FAIL;
+    // } else {
+    //   res =ESP_FAIL;
+    //   if(fb->width > 400){
+    //     if(fb->format != PIXFORMAT_JPEG){
+    //       bool jpeg_converted = frame2jpg(fb, 80, &_jpg_buf, &_jpg_buf_len);
+    //       Serial.println("JPEG compression failed");
+    //       res = ESP_FAIL;
+    //     } else {
+    //       _jpg_buf_len = fb->len;
+    //       _jpg_buf = fb->buf;
+    //     }
+    //   }
+    // }
+    // if(res == ESP_OK){
+    //   size_t hlen = snprintf((char *)part_buf, 64, _STREAM_PART, _jpg_buf_len);
+    //   res = httpd_resp_send_chunk(req, (const char *)part_buf, hlen);
+    // }
+    // if(res == ESP_OK){
+    //   res = httpd_resp_send_chunk(req, (const char *)_jpg_buf, _jpg_buf_len);
+    // }
+    // if(res == ESP_OK){
+    //   res = httpd_resp_send_chunk(req, _STREAM_BOUNDARY, strlen(_STREAM_BOUNDARY));
+    // }
+    // if(fb){
+    //   esp_camera_fb_return(fb);
+    //   fb = NULL;
+    //   _jpg_buf = NULL;
+    // } else if(_jpg_buf){
+    //   free(_jpg_buf);
+    //   _jpg_buf = NULL;
+    // }
+    fb = esp_camera_fb_get();
+    if (!fb) {
+        ESP_LOGE(TAG, "Camera capture failed");
+        httpd_resp_send_500(req);
+        return ESP_FAIL;
+    }
+    res = httpd_resp_set_type(req, "image/jpeg");
+    if(res == ESP_OK){
+        res = httpd_resp_set_hdr(req, "Content-Disposition", "inline; filename=capture.jpg");
+    }
+
+    if(res == ESP_OK){
+        if(fb->format == PIXFORMAT_JPEG){
+            fb_len = fb->len;
+            res = httpd_resp_send(req, (const char *)fb->buf, fb->len);
+        } else {
+            jpg_chunking_t jchunk = {req, 0};
+            res = frame2jpg_cb(fb, 80, jpg_encode_stream, &jchunk)?ESP_OK:ESP_FAIL;
+            httpd_resp_send_chunk(req, NULL, 0);
+            fb_len = jchunk.len;
+        }
+    }
+    esp_camera_fb_return(fb);
+    int64_t fr_end = esp_timer_get_time();
+    ESP_LOGI(TAG, "JPG: %uKB %ums", (uint32_t)(fb_len/1024), (uint32_t)((fr_end - fr_start)/1000));
+    return res;
+    
+  }
+
+  else if(!strcmp(variable, "savePhoto")) {
+    Serial.println("Stop");
+    
+  }
+
   else if(!strcmp(variable, "stop")) {
     Serial.println("Stop");
     digitalWrite(MOTOR_1_PIN_1, 0);
     digitalWrite(MOTOR_1_PIN_2, 0);
     digitalWrite(MOTOR_2_PIN_1, 0);
     digitalWrite(MOTOR_2_PIN_2, 0);
-  }
-  else if(!strcmp(variable, "takePhoto")) {
-    Serial.println("Image requested.");
-    server.on("/photo", HTTP_GET, [](AsyncWebServerRequest * request) {
- 
-    
-    camera_fb_t* fb = NULL;
-    // Skip first 3 frames (increase/decrease number as needed).
-    for (int i = 0; i < 3; i++) {
-      fb = esp_camera_fb_get();
-      esp_camera_fb_return(fb);
-      fb = NULL;
-    }
-    
-    // Take a new photo
-    fb = NULL;  
-    fb = esp_camera_fb_get();  
-    if(!fb) {
-      Serial.println("Camera capture failed");
-      delay(1000);
-      ESP.restart();
-    }
- 
-    request->send_P(200, "image/jpeg", (const uint8_t *)frame->buf, frame->len);
- 
-    esp_camera_fb_return(fb);
-    });
- 
-    server.begin();
-    
   }
   else {
     res = -1;
@@ -364,8 +427,6 @@ static esp_err_t cmd_handler(httpd_req_t *req){
   httpd_resp_set_hdr(req, "Access-Control-Allow-Origin", "*");
   return httpd_resp_send(req, NULL, 0);
 }
-
-
 
 void startCameraServer(){
   httpd_config_t config = HTTPD_DEFAULT_CONFIG();
@@ -463,6 +524,18 @@ void setup() {
   
   // Start streaming web server
   startCameraServer();
+}
+
+static size_t jpg_encode_stream(void * arg, size_t index, const void* data, size_t len){
+    jpg_chunking_t *j = (jpg_chunking_t *)arg;
+    if(!index){
+        j->len = 0;
+    }
+    if(httpd_resp_send_chunk(j->req, (const char *)data, len) != ESP_OK){
+        return 0;
+    }
+    j->len += len;
+    return len;
 }
 
 void loop() {
