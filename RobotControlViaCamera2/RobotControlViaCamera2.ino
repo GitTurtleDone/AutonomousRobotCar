@@ -23,8 +23,9 @@ typedef struct {
 
 
 // Replace with your network credentials
-const char* ssid = "SPARK-B315-DB3F";
-const char* password = "A2DJG680N80";
+const char* ssid = "your_ssid";
+const char* password = "your_pass";
+bool photoTaken = false;
 
 #define PART_BOUNDARY "123456789000000000000987654321"
 
@@ -186,17 +187,37 @@ static const char PROGMEM INDEX_HTML[] = R"rawliteral(
       <tr><td colspan="3" align="center"><button class="button" onmousedown="toggleCheckbox('forward');" ontouchstart="toggleCheckbox('forward');" onmouseup="toggleCheckbox('stop');" ontouchend="toggleCheckbox('stop');">Forward</button></td></tr>
       <tr><td align="center"><button class="button" onmousedown="toggleCheckbox('left');" ontouchstart="toggleCheckbox('left');" onmouseup="toggleCheckbox('stop');" ontouchend="toggleCheckbox('stop');">Left</button></td><td align="center"><button class="button" onmousedown="toggleCheckbox('stop');" ontouchstart="toggleCheckbox('stop');">Stop</button></td><td align="center"><button class="button" onmousedown="toggleCheckbox('right');" ontouchstart="toggleCheckbox('right');" onmouseup="toggleCheckbox('stop');" ontouchend="toggleCheckbox('stop');">Right</button></td></tr>
       <tr><td colspan="3" align="center"><button class="button" onmousedown="toggleCheckbox('backward');" ontouchstart="toggleCheckbox('backward');" onmouseup="toggleCheckbox('stop');" ontouchend="toggleCheckbox('stop');">Backward</button></td></tr>                   
-      <tr><td colspan="3" align="center"><button class="button" onclick="toggleCheckbox('takePhoto');">Take a photo</button></td><td align="center"><button class="button" onclick="toggleCheckbox('savePhoto');" >Save Photo</button></td></tr>
+      <!-- Add an <a> element with an initially empty href -->
+      // <a id="saveButton" href="" download="" style="display: none;">
+      //   <button>Save Image</button>
+      // </a>
+
       
       
     </table>
+   
+   <!-- Add an <img> element to load the image -->
+      <img src="" id="capturedPhoto" alt="Captured Image"> //http://192.168.1.65/action?go=takePhoto
    <script>
-   function toggleCheckbox(x) {
-     var xhr = new XMLHttpRequest();
-     xhr.open("GET", "/action?go=" + x, true);
-     xhr.send();
-   }
-   window.onload = document.getElementById("photo").src = window.location.href.slice(0, -1) + ":81/stream";
+    function toggleCheckbox(x) {
+      var xhr = new XMLHttpRequest();
+      xhr.open("GET", "/action?go=" + x, true);
+      xhr.send();
+    }
+    //window.onload = 
+    
+    window.onload = function() {
+      // var saveButton = document.getElementById("saveButton");
+      // var imgElement = document.querySelector("img");
+
+      // imgElement.onload = function() {
+      //   // Set the dynamically generated href attribute
+      //   saveButton.href = window.location.href.slice(0, -1) + "/action?go=takePhoto";
+      //   saveButton.style.display = "block";
+      // };
+      document.getElementById("photo").src = window.location.href.slice(0, -1) + ":81/stream";
+      //document.getElementById("caputuredPhoto").src = window.location.href.slice(0, -1) + "/action?go=takePhoto";
+    };
   </script>
   </body>
 </html>
@@ -340,6 +361,7 @@ static esp_err_t cmd_handler(httpd_req_t *req){
   }
   
   else if(!strcmp(variable, "takePhoto")) {
+    Serial.println("Take a photo");
     // fb = esp_camera_fb_get();
     // if (!fb) {
     //   Serial.println("Camera capture failed");
@@ -375,6 +397,7 @@ static esp_err_t cmd_handler(httpd_req_t *req){
     //   free(_jpg_buf);
     //   _jpg_buf = NULL;
     // }
+    //----------------------------
     fb = esp_camera_fb_get();
     if (!fb) {
         ESP_LOGE(TAG, "Camera capture failed");
@@ -402,10 +425,9 @@ static esp_err_t cmd_handler(httpd_req_t *req){
     ESP_LOGI(TAG, "JPG: %uKB %ums", (uint32_t)(fb_len/1024), (uint32_t)((fr_end - fr_start)/1000));
     return res;
     
-  }
-
-  else if(!strcmp(variable, "savePhoto")) {
-    Serial.println("Stop");
+    //photoTaken = false;
+    //startCameraServer();
+    //----------------------------
     
   }
 

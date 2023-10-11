@@ -1,0 +1,196 @@
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>ESP32-CAM Robot</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      body {
+        font-family: Arial;
+        text-align: center;
+        margin: 0px auto;
+        padding-top: 30px;
+      }
+      table {
+        margin-left: auto;
+        margin-right: auto;
+      }
+      td {
+        padding: 8 px;
+      }
+      .button {
+        background-color: #2f4468;
+        border: none;
+        color: white;
+        padding: 10px 20px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 18px;
+        margin: 6px 3px;
+        cursor: pointer;
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        -khtml-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+        -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+      }
+      img {
+        width: auto;
+        max-width: 100%;
+        height: auto;
+      }
+    </style>
+    <!-- <link rel="stylesheet" href="https://pyscript.net/alpha/pyscript.css" />
+    <script defer src="https://pyscript.net/alpha/pyscript.js"></script> -->
+  </head>
+  <body>
+    <h1>ESP32-CAM Robot</h1>
+    <img src="" id="photo" />
+    <table>
+      <tr>
+        <td colspan="3" align="center">
+          <button
+            class="button"
+            onmousedown="toggleCheckbox('forward');"
+            ontouchstart="toggleCheckbox('forward');"
+            onmouseup="toggleCheckbox('stop');"
+            ontouchend="toggleCheckbox('stop');"
+          >
+            Forward
+          </button>
+        </td>
+      </tr>
+      <tr>
+        <td align="center">
+          <button
+            class="button"
+            onmousedown="toggleCheckbox('left');"
+            ontouchstart="toggleCheckbox('left');"
+            onmouseup="toggleCheckbox('stop');"
+            ontouchend="toggleCheckbox('stop');"
+          >
+            Left
+          </button>
+        </td>
+        <td align="center">
+          <button
+            class="button"
+            onmousedown="toggleCheckbox('stop');"
+            ontouchstart="toggleCheckbox('stop');"
+          >
+            Stop
+          </button>
+        </td>
+        <td align="center">
+          <button
+            class="button"
+            onmousedown="toggleCheckbox('right');"
+            ontouchstart="toggleCheckbox('right');"
+            onmouseup="toggleCheckbox('stop');"
+            ontouchend="toggleCheckbox('stop');"
+          >
+            Right
+          </button>
+        </td>
+      </tr>
+      <tr>
+        <td colspan="3" align="center">
+          <button
+            class="button"
+            onmousedown="toggleCheckbox('backward');"
+            ontouchstart="toggleCheckbox('backward');"
+            onmouseup="toggleCheckbox('stop');"
+            ontouchend="toggleCheckbox('stop');"
+          >
+            Backward
+          </button>
+        </td>
+      </tr>
+      <tr>
+        <td colspan="3" align="center">
+          <!-- <button class="button" onclick="capturePhoto();">Take a photo</button> -->
+          <button class="button" id="btnTakePhoto"> Take and Save a Photo</button>
+        </td>
+        <!-- <td align="center">
+          <button class="button" onclick="toggleCheckbox('restartStreaming');">
+            Restart Streaming
+          </button>
+        </td> -->
+      </tr>
+      <!-- Add an <a> element with an initially empty href -->
+      </a>
+    </table>
+    <a id="saveButton" href="" download="" style="display: none">
+    <button>Save Image</button>
+     <p id="responseMessage"></p> 
+    <!-- Add an <img> element to load the image -->
+    <img id="capturedPhoto" src="" alt="Captured Image" />
+    <!-- <a download="image.png" href="http://192.168.1.65/action?go=takePhoto">
+      <button>Take a photo</button> </a
+    >; -->
+    <!--//http://192.168.1.65/action?go=takePhoto-->
+    <script>
+      function toggleCheckbox(x) {
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", "http://192.168.1.65/action?go=" + x, true);
+        xhr.send();
+        // if ((x = "takePhoto"))
+        //   document.getElementById("caputuredPhoto").src =
+        //     "http://192.168.1.65/action?go=takePhoto";
+        // // <py-script src="Capture_Image_CNN.py"></py-script>;
+      }
+      document.getElementById("btnTakePhoto").addEventListener("click", function() {
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "/download", true);
+            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    document.getElementById("responseMessage").textContent = xhr.responseText;
+                }
+            };
+            xhr.send();
+        });
+      // function capturePhoto() {
+
+      //   // JavaScript code for sending a request to the /download endpoint
+        
+      //   // var image_url = "http://192.168.1.65/action?go=takePhoto"; // Replace with the actual image URL
+      //   // var imageElement = document.getElementById("capturedPhoto");
+
+      //   // fetch(image_url, {
+      //   //   method: "GET", // You can use any HTTP method you need
+      //   //   mode: "no-cors", // Set the mode to 'no-cors'
+      //   // })
+      //   //   .then((response) => response.blob())
+      //   //   .then((blob) => {
+      //   //     var a = document.createElement("a");
+      //   //     a.href = URL.createObjectURL(blob);
+      //   //     a.download = "CNN.jpg";
+      //   //     a.style.display = "none";
+      //   //     document.body.appendChild(a);
+      //   //     a.click();
+      //   //     document.body.removeChild(a);
+      //   //   })
+      //   //   .catch((error) => {
+      //   //     console.error("Error downloading image:", error);
+      //   //   });
+
+      //   // var xhr = new XMLHttpRequest();
+      //   // xhr.open("GET", "http://192.168.1.65/action?go=takePhoto", true);
+      //   // xhr.send();
+      //   // document.getElementById("capturedPhoto").src =
+      //   //   "http://192.168.1.65/action?go=takePhoto";
+      //   // <py-script src="Capture_Image_CNN.py"></py-script>;
+      // }
+     
+
+      window.onload = function () {
+        document.getElementById("photo").src = "http://192.168.1.65:81/stream";
+        // document.getElementById("capturePhoto").src =
+        //   "http://192.168.1.65/action?go=takePhoto";
+      };
+    </script>
+  </body>
+</html>
