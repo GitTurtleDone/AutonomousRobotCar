@@ -15,6 +15,7 @@
 #include "soc/soc.h"             // disable brownout problems
 #include "soc/rtc_cntl_reg.h"    // disable brownout problems
 #include "esp_http_server.h"
+#include "ESP32Servo.h"
 
 typedef struct {
         httpd_req_t *req;
@@ -23,9 +24,9 @@ typedef struct {
 
 
 // Replace with your network credentials
-const char* ssid = "your_ssid";
-const char* password = "your_pass";
-bool photoTaken = false;
+// const char* ssid = "your_ssid";
+// const char* password = "your_pass";
+
 
 #define PART_BOUNDARY "123456789000000000000987654321"
 
@@ -134,10 +135,22 @@ bool photoTaken = false;
   #error "Camera model not selected"
 #endif
 
-#define MOTOR_1_PIN_1    14
-#define MOTOR_1_PIN_2    15
-#define MOTOR_2_PIN_1    13
-#define MOTOR_2_PIN_2    12
+#define MOTOR_1_PIN_1    12
+#define MOTOR_1_PIN_2    13
+#define MOTOR_2_PIN_1    14
+#define MOTOR_2_PIN_2    15
+
+#define servoPin 2
+int servoPos = 135;
+int servoStep = 10;
+
+Servo servoN1;
+Servo servoN2;
+Servo myServo;
+
+int leftSpeed = 255;
+int rightSpeed = 255;
+int speedStep = 10;
 
 static const char* _STREAM_CONTENT_TYPE = "multipart/x-mixed-replace;boundary=" PART_BOUNDARY;
 static const char* _STREAM_BOUNDARY = "\r\n--" PART_BOUNDARY "\r\n";
@@ -186,7 +199,7 @@ static const char PROGMEM INDEX_HTML[] = R"rawliteral(
     <table>
       <tr><td colspan="3" align="center"><button class="button" onmousedown="toggleCheckbox('forward');" ontouchstart="toggleCheckbox('forward');" onmouseup="toggleCheckbox('stop');" ontouchend="toggleCheckbox('stop');">Forward</button></td></tr>
       <tr><td align="center"><button class="button" onmousedown="toggleCheckbox('left');" ontouchstart="toggleCheckbox('left');" onmouseup="toggleCheckbox('stop');" ontouchend="toggleCheckbox('stop');">Left</button></td><td align="center"><button class="button" onmousedown="toggleCheckbox('stop');" ontouchstart="toggleCheckbox('stop');">Stop</button></td><td align="center"><button class="button" onmousedown="toggleCheckbox('right');" ontouchstart="toggleCheckbox('right');" onmouseup="toggleCheckbox('stop');" ontouchend="toggleCheckbox('stop');">Right</button></td></tr>
-      <tr><td colspan="3" align="center"><button class="button" onmousedown="toggleCheckbox('backward');" ontouchstart="toggleCheckbox('backward');" onmouseup="toggleCheckbox('stop');" ontouchend="toggleCheckbox('stop');">Backward</button></td></tr>                   
+      <tr><td colspan="3" align="center"><button class="button" onmousedown="toggleCheckbox('backward');" ontouchstart="toggleCheckbox('backward');" onmouseup="toggleCheckbox('stop');" ontouchend="toggleCheckbox('stop');">Backward</button></td></tr>                 
       <!-- Add an <a> element with an initially empty href -->
       // <a id="saveButton" href="" download="" style="display: none;">
       //   <button>Save Image</button>
@@ -333,31 +346,39 @@ static esp_err_t cmd_handler(httpd_req_t *req){
   
   if(!strcmp(variable, "forward")) {
     Serial.println("Forward");
-    digitalWrite(MOTOR_1_PIN_1, 1);
-    digitalWrite(MOTOR_1_PIN_2, 0);
-    digitalWrite(MOTOR_2_PIN_1, 1);
-    digitalWrite(MOTOR_2_PIN_2, 0);
+    analogWrite(MOTOR_1_PIN_1, leftSpeed);
+    analogWrite(MOTOR_1_PIN_2, 0);
+    analogWrite(MOTOR_2_PIN_1, rightSpeed);
+    analogWrite(MOTOR_2_PIN_2, 0);
   }
   else if(!strcmp(variable, "left")) {
     Serial.println("Left");
-    digitalWrite(MOTOR_1_PIN_1, 0);
-    digitalWrite(MOTOR_1_PIN_2, 1);
-    digitalWrite(MOTOR_2_PIN_1, 1);
-    digitalWrite(MOTOR_2_PIN_2, 0);
+    analogWrite(MOTOR_1_PIN_1, 0);
+    analogWrite(MOTOR_1_PIN_2, leftSpeed);
+    analogWrite(MOTOR_2_PIN_1, rightSpeed);
+    analogWrite(MOTOR_2_PIN_2, 0);
   }
   else if(!strcmp(variable, "right")) {
     Serial.println("Right");
-    digitalWrite(MOTOR_1_PIN_1, 1);
-    digitalWrite(MOTOR_1_PIN_2, 0);
-    digitalWrite(MOTOR_2_PIN_1, 0);
-    digitalWrite(MOTOR_2_PIN_2, 1);
+    analogWrite(MOTOR_1_PIN_1, leftSpeed);
+    analogWrite(MOTOR_1_PIN_2, 0);
+    analogWrite(MOTOR_2_PIN_1, 0);
+    analogWrite(MOTOR_2_PIN_2, rightSpeed);
   }
   else if(!strcmp(variable, "backward")) {
     Serial.println("Backward");
-    digitalWrite(MOTOR_1_PIN_1, 0);
-    digitalWrite(MOTOR_1_PIN_2, 1);
-    digitalWrite(MOTOR_2_PIN_1, 0);
-    digitalWrite(MOTOR_2_PIN_2, 1);
+    analogWrite(MOTOR_1_PIN_1, 0);
+    analogWrite(MOTOR_1_PIN_2, leftSpeed);
+    analogWrite(MOTOR_2_PIN_1, 0);
+    analogWrite(MOTOR_2_PIN_2, rightSpeed);
+  }
+
+  else if(!strcmp(variable, "stop")) {
+    Serial.println("Stop");
+    analogWrite(MOTOR_1_PIN_1, 0);
+    analogWrite(MOTOR_1_PIN_2, 0);
+    analogWrite(MOTOR_2_PIN_1, 0);
+    analogWrite(MOTOR_2_PIN_2, 0);
   }
   
   else if(!strcmp(variable, "takePhoto")) {
@@ -431,13 +452,67 @@ static esp_err_t cmd_handler(httpd_req_t *req){
     
   }
 
-  else if(!strcmp(variable, "stop")) {
-    Serial.println("Stop");
-    digitalWrite(MOTOR_1_PIN_1, 0);
-    digitalWrite(MOTOR_1_PIN_2, 0);
-    digitalWrite(MOTOR_2_PIN_1, 0);
-    digitalWrite(MOTOR_2_PIN_2, 0);
+  else if(!strcmp(variable, "leftSpeedIncrease")) {
+    Serial.println("Increse left speed");
+    leftSpeed += speedStep;
   }
+
+  else if(!strcmp(variable, "leftSpeedDecrease")) {
+    Serial.println("Decrese left speed");
+    leftSpeed -= speedStep;
+  }
+
+  else if(!strcmp(variable, "leftSpeed")) {
+    Serial.println("Get left speed");
+    char leftSpeedStr[3];
+    sprintf(leftSpeedStr, "%d", leftSpeed);
+    httpd_resp_send(req, leftSpeedStr, HTTPD_RESP_USE_STRLEN);
+    return res;
+  }
+  //-------------------------------------------
+  else if(!strcmp(variable, "rightSpeedIncrease")) {
+    Serial.println("Increse right speed");
+    rightSpeed += speedStep;
+  }
+
+  else if(!strcmp(variable, "rightSpeedDecrease")) {
+    Serial.println("Decrese right speed");
+    rightSpeed -= speedStep;
+  }
+
+  else if(!strcmp(variable, "rightSpeed")) {
+    Serial.println("Get right speed");
+    char rightSpeedStr[3];
+    sprintf(rightSpeedStr, "%d", rightSpeed);
+    httpd_resp_send(req, rightSpeedStr, HTTPD_RESP_USE_STRLEN);
+    return res;
+  }
+
+  //-------------------------------------------
+
+  else if(!strcmp(variable, "servoLeft")) {
+    Serial.println("Servo Left");
+    servoPos += servoStep;
+    myServo.write(servoPos);
+  }
+
+  else if(!strcmp(variable, "servoRight")) {
+    Serial.println("Servo Right");
+    servoPos -= servoStep;
+    myServo.write(servoPos);
+  }
+
+  else if(!strcmp(variable, "servoAngle")) {
+    Serial.println("Get Servo Angle");
+    char servoPosStr[3];
+    sprintf(servoPosStr, "%d", servoPos);
+    httpd_resp_send(req, servoPosStr, HTTPD_RESP_USE_STRLEN);
+    return res;
+  }
+
+  //-------------------------------------------
+
+  
   else {
     res = -1;
   }
@@ -449,6 +524,8 @@ static esp_err_t cmd_handler(httpd_req_t *req){
   httpd_resp_set_hdr(req, "Access-Control-Allow-Origin", "*");
   return httpd_resp_send(req, NULL, 0);
 }
+
+
 
 void startCameraServer(){
   httpd_config_t config = HTTPD_DEFAULT_CONFIG();
@@ -466,6 +543,12 @@ void startCameraServer(){
     .handler   = cmd_handler,
     .user_ctx  = NULL
   };
+  // httpd_uri_t value_uri = {
+  //   .uri       = "/value",
+  //   .method    = HTTP_GET,
+  //   .handler   = value_handler,
+  //   .user_ctx  = NULL
+  // };
   httpd_uri_t stream_uri = {
     .uri       = "/stream",
     .method    = HTTP_GET,
@@ -475,6 +558,7 @@ void startCameraServer(){
   if (httpd_start(&camera_httpd, &config) == ESP_OK) {
     httpd_register_uri_handler(camera_httpd, &index_uri);
     httpd_register_uri_handler(camera_httpd, &cmd_uri);
+    // httpd_register_uri_handler(camera_httpd, &value_uri);
   }
   config.server_port += 1;
   config.ctrl_port += 1;
@@ -490,6 +574,13 @@ void setup() {
   pinMode(MOTOR_1_PIN_2, OUTPUT);
   pinMode(MOTOR_2_PIN_1, OUTPUT);
   pinMode(MOTOR_2_PIN_2, OUTPUT);
+  
+  //servoN1.attach(2, 1000, 2000);
+  //servoN2.attach(16, 1000, 2000);
+
+  myServo.setPeriodHertz(50);
+  myServo.attach(servoPin, 1000, 2000);
+  myServo.write(servoPos);
   
   Serial.begin(115200);
   Serial.setDebugOutput(false);

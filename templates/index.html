@@ -111,85 +111,173 @@
       <tr>
         <td colspan="3" align="center">
           <!-- <button class="button" onclick="capturePhoto();">Take a photo</button> -->
-          <button class="button" id="btnTakePhoto"> Take and Save a Photo</button>
-        </td>
-        <!-- <td align="center">
-          <button class="button" onclick="toggleCheckbox('restartStreaming');">
-            Restart Streaming
+          <button class="button" id="btnTakePhoto">
+            Take and Save a Photo
           </button>
-        </td> -->
+        </td>
       </tr>
-      <!-- Add an <a> element with an initially empty href -->
-      </a>
+      <tr>
+        <td colspan="3" align="center">
+          <button class="button" id="btnLeftSpeedDecrease">
+            Decrease Left Speed
+          </button>
+          <input type="text" id="iptLeftSpeed" value="{{leftSpeed}}" />
+          <button class="button" id="btnLeftSpeedIncrease">
+            Increase Left Speed
+          </button>
+        </td>
+      </tr>
+
+      <tr>
+        <td colspan="3" align="center">
+          <button class="button" id="btnRightSpeedDecrease">
+            Decrease Right Speed
+          </button>
+          <input type="text" id="iptRightSpeed" value="{{rightSpeed}}" />
+          <button class="button" id="btnRightSpeedIncrease">
+            Increase Right Speed
+          </button>
+        </td>
+      </tr>
+
+      <tr>
+        <td colspan="3" align="center">
+          <button class="button" id="btnServoLeft">Servo Left</button>
+          <input type="text" id="iptServoAngle" value="{{servoAngle}}" />
+          <button class="button" id="btnServoRight">Servo Right</button>
+        </td>
+      </tr>
     </table>
-    <a id="saveButton" href="" download="" style="display: none">
-    <button>Save Image</button>
-     <p id="responseMessage"></p> 
-    <!-- Add an <img> element to load the image -->
-    <img id="capturedPhoto" src="" alt="Captured Image" />
-    <!-- <a download="image.png" href="http://192.168.1.65/action?go=takePhoto">
-      <button>Take a photo</button> </a
-    >; -->
-    <!--//http://192.168.1.65/action?go=takePhoto-->
+
     <script>
       function toggleCheckbox(x) {
         var xhr = new XMLHttpRequest();
         xhr.open("GET", "http://192.168.1.65/action?go=" + x, true);
         xhr.send();
-        // if ((x = "takePhoto"))
-        //   document.getElementById("caputuredPhoto").src =
-        //     "http://192.168.1.65/action?go=takePhoto";
-        // // <py-script src="Capture_Image_CNN.py"></py-script>;
       }
-      document.getElementById("btnTakePhoto").addEventListener("click", function() {
-            var xhr = new XMLHttpRequest();
-            xhr.open("POST", "/download", true);
-            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-            xhr.onreadystatechange = function() {
-                if (xhr.readyState === 4 && xhr.status === 200) {
-                    document.getElementById("responseMessage").textContent = xhr.responseText;
-                }
-            };
-            xhr.send();
+      document
+        .getElementById("btnTakePhoto")
+        .addEventListener("click", function () {
+          var xhr = new XMLHttpRequest();
+          xhr.open("POST", "/download", true);
+          xhr.setRequestHeader(
+            "Content-Type",
+            "application/x-www-form-urlencoded"
+          );
+          xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4 && xhr.status === 200) {
+              document.getElementById("responseMessage").textContent =
+                xhr.responseText;
+            }
+          };
+          xhr.send();
         });
-      // function capturePhoto() {
-
-      //   // JavaScript code for sending a request to the /download endpoint
-        
-      //   // var image_url = "http://192.168.1.65/action?go=takePhoto"; // Replace with the actual image URL
-      //   // var imageElement = document.getElementById("capturedPhoto");
-
-      //   // fetch(image_url, {
-      //   //   method: "GET", // You can use any HTTP method you need
-      //   //   mode: "no-cors", // Set the mode to 'no-cors'
-      //   // })
-      //   //   .then((response) => response.blob())
-      //   //   .then((blob) => {
-      //   //     var a = document.createElement("a");
-      //   //     a.href = URL.createObjectURL(blob);
-      //   //     a.download = "CNN.jpg";
-      //   //     a.style.display = "none";
-      //   //     document.body.appendChild(a);
-      //   //     a.click();
-      //   //     document.body.removeChild(a);
-      //   //   })
-      //   //   .catch((error) => {
-      //   //     console.error("Error downloading image:", error);
-      //   //   });
-
-      //   // var xhr = new XMLHttpRequest();
-      //   // xhr.open("GET", "http://192.168.1.65/action?go=takePhoto", true);
-      //   // xhr.send();
-      //   // document.getElementById("capturedPhoto").src =
-      //   //   "http://192.168.1.65/action?go=takePhoto";
-      //   // <py-script src="Capture_Image_CNN.py"></py-script>;
-      // }
-     
+      document
+        .getElementById("btnLeftSpeedDecrease")
+        .addEventListener("click", function () {
+          toggleCheckbox("leftSpeedDecrease");
+          var xhr = new XMLHttpRequest();
+          xhr.open("POST", "/getLeftSpeed", true);
+          xhr.setRequestHeader(
+            "Content-Type",
+            "application/x-www-form-urlencoded"
+          );
+          xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4 && xhr.status === 200) {
+              document.getElementById("iptLeftSpeed").value = xhr.responseText;
+            }
+          };
+          xhr.send();
+        });
+      document
+        .getElementById("btnLeftSpeedIncrease")
+        .addEventListener("click", function () {
+          toggleCheckbox("leftSpeedIncrease");
+          var xhr = new XMLHttpRequest();
+          xhr.open("POST", "/getLeftSpeed", true);
+          xhr.setRequestHeader(
+            "Content-Type",
+            "application/x-www-form-urlencoded"
+          );
+          xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4 && xhr.status === 200) {
+              document.getElementById("iptLeftSpeed").value = xhr.responseText;
+            }
+          };
+          xhr.send();
+        });
+      document
+        .getElementById("btnRightSpeedDecrease")
+        .addEventListener("click", function () {
+          toggleCheckbox("rightSpeedDecrease");
+          var xhr = new XMLHttpRequest();
+          xhr.open("POST", "/getRightSpeed", true);
+          xhr.setRequestHeader(
+            "Content-Type",
+            "application/x-www-form-urlencoded"
+          );
+          xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4 && xhr.status === 200) {
+              document.getElementById("iptRightSpeed").value = xhr.responseText;
+            }
+          };
+          xhr.send();
+        });
+      document
+        .getElementById("btnRightSpeedIncrease")
+        .addEventListener("click", function () {
+          toggleCheckbox("rightSpeedIncrease");
+          var xhr = new XMLHttpRequest();
+          xhr.open("POST", "/getRightSpeed", true);
+          xhr.setRequestHeader(
+            "Content-Type",
+            "application/x-www-form-urlencoded"
+          );
+          xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4 && xhr.status === 200) {
+              document.getElementById("iptRightSpeed").value = xhr.responseText;
+            }
+          };
+          xhr.send();
+        });
+      document
+        .getElementById("btnServoLeft")
+        .addEventListener("click", function () {
+          toggleCheckbox("servoLeft");
+          var xhr = new XMLHttpRequest();
+          xhr.open("POST", "/getServoAngle", true);
+          xhr.setRequestHeader(
+            "Content-Type",
+            "application/x-www-form-urlencoded"
+          );
+          xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4 && xhr.status === 200) {
+              document.getElementById("iptServoAngle").value = xhr.responseText;
+            }
+          };
+          xhr.send();
+        });
+      document
+        .getElementById("btnServoRight")
+        .addEventListener("click", function () {
+          toggleCheckbox("servoRight");
+          // toggleCheckbox('servoAngle');
+          var xhr = new XMLHttpRequest();
+          xhr.open("POST", "/getServoAngle", true);
+          xhr.setRequestHeader(
+            "Content-Type",
+            "application/x-www-form-urlencoded"
+          );
+          xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4 && xhr.status === 200) {
+              document.getElementById("iptServoAngle").value = xhr.responseText;
+            }
+          };
+          xhr.send();
+        });
 
       window.onload = function () {
         document.getElementById("photo").src = "http://192.168.1.65:81/stream";
-        // document.getElementById("capturePhoto").src =
-        //   "http://192.168.1.65/action?go=takePhoto";
       };
     </script>
   </body>

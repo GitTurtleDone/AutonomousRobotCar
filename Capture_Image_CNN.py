@@ -67,10 +67,13 @@ app = Flask(__name__)
 
 # Initialize a global counter
 image_counter = 1
+servoAngle = "135"
+leftSpeed = "255"
+rightSpeed = "255"
 
 @app.route('/')
 def index():
-    return render_template('index.html', counter=image_counter)
+    return render_template('index.html', counter=image_counter, servoAngle = servoAngle, leftSpeed = leftSpeed, rightSpeed = rightSpeed)
     # the index .html file should be stored in a "template" folder of the project file
 
 @app.route('/favicon.ico')
@@ -95,6 +98,37 @@ def download_image():
     image_counter += 1
 
     return "Image downloaded and saved as " + filename
+@app.route('/getServoAngle', methods=['POST'])
+def get_servoAngle():
+    servoAngle_url = "http://192.168.1.65/action?go=servoAngle"
+    global servoAngle, image_counter
+    servoAngle = requests.get(servoAngle_url).text
+    # console.log(servoAngle)
+    # if not isinstance(servoAngle,str):
+    #     servoAngle = str(servoAngle)
+    
+
+    return servoAngle
+@app.route('/getLeftSpeed', methods=['POST'])
+def get_leftSpeed():
+    leftSpeed_url = "http://192.168.1.65/action?go=leftSpeed"
+    leftSpeed = requests.get(leftSpeed_url).text
+    # console.log(servoAngle)
+    # if not isinstance(servoAngle,str):
+    #     servoAngle = str(servoAngle)
+    
+
+    return leftSpeed
+@app.route('/getRightSpeed', methods=['POST'])
+def get_rightSpeed():
+    rightSpeed_url = "http://192.168.1.65/action?go=rightSpeed"
+    rightSpeed = requests.get(rightSpeed_url).text
+    # console.log(servoAngle)
+    # if not isinstance(servoAngle,str):
+    #     servoAngle = str(servoAngle)
+    
+
+    return rightSpeed
 
 if __name__ == '__main__':
     app.run()
