@@ -24,8 +24,8 @@ typedef struct {
 
 
 // Replace with your network credentials
-// const char* ssid = "your_ssid";
-// const char* password = "your_pass";
+const char* ssid = "your_ssid";
+const char* password = "your_password";
 
 
 #define PART_BOUNDARY "123456789000000000000987654321"

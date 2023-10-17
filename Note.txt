@@ -4,3 +4,6 @@ Still working even if the no core dump partition found.
 Error discussed in this link.
 https://forum.arduino.cc/t/esp32-cam-esp-core-dump-flash/1074812/41
 Worked with DIO flash, haven't check back if it worked with QIO
+
+ultralytics version worked before 8.0.29
+current version 8.0.198

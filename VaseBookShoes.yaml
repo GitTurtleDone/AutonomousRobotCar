@@ -1,0 +1,5 @@
+train: VaseBookShoes/train/images
+val: VaseBookShoes/val/images
+
+nc: 3
+names: ["vase", "book", "shoes"]

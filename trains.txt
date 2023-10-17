@@ -1,0 +1,25 @@
+1st 
+    Epoch    GPU_mem   box_loss   cls_loss   dfl_loss  Instances       Size
+     99/100      3.59G     0.3228     0.2194     0.8455          4        640: 100%|██████████| 11/11 [00:22<00:00,  2.06s/it]
+                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100%|██████████| 2/2 [00:01<00:00,  1.45it/s]
+                   all         37         43       0.97      0.915      0.972      0.878
+
+      Epoch    GPU_mem   box_loss   cls_loss   dfl_loss  Instances       Size
+    100/100      3.59G     0.3535     0.2269     0.8415          4        640: 100%|██████████| 11/11 [00:22<00:00,  2.08s/it]
+                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100%|██████████| 2/2 [00:01<00:00,  1.47it/s]
+                   all         37         43      0.973      0.917      0.972      0.878
+
+100 epochs completed in 0.719 hours.
+Optimizer stripped from runs/detect/train5/weights/last.pt, 22.5MB
+Optimizer stripped from runs/detect/train5/weights/best.pt, 22.5MB
+
+Validating runs/detect/train5/weights/best.pt...
+Ultralytics YOLOv8.0.199 🚀 Python-3.9.16 torch-1.13.1+cu117 CUDA:0 (Quadro M1200, 4096MiB)
+Model summary (fused): 168 layers, 11126745 parameters, 0 gradients, 28.4 GFLOPs
+                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100%|██████████| 2/2 [00:01<00:00,  1.19it/s]
+                   all         37         43       0.97      0.921      0.976      0.888
+                  vase         37         17      0.999          1      0.995      0.933
+                  book         37         14          1      0.931      0.995      0.916
+                 shoes         37         12       0.91      0.833      0.938      0.815
+Speed: 1.5ms preprocess, 33.9ms inference, 0.0ms loss, 1.8ms postprocess per image
+Results saved to runs/detect/train5

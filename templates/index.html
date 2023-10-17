@@ -152,7 +152,7 @@
     <script>
       function toggleCheckbox(x) {
         var xhr = new XMLHttpRequest();
-        xhr.open("GET", "http://192.168.1.65/action?go=" + x, true);
+        xhr.open("GET", "http://192.168.1.64/action?go=" + x, true);
         xhr.send();
       }
       document
@@ -277,7 +277,7 @@
         });
 
       window.onload = function () {
-        document.getElementById("photo").src = "http://192.168.1.65:81/stream";
+        document.getElementById("photo").src = "http://192.168.1.64:81/stream";
       };
     </script>
   </body>

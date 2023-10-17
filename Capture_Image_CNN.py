@@ -58,7 +58,7 @@ from PIL import Image
 import requests
 from io import BytesIO
 
-# image_url = "http://192.168.1.65/action?go=takePhoto"
+# image_url = "http://192.168.1.64/action?go=takePhoto"
 # response = requests.get(image_url)
 # img = Image.open(BytesIO(response.content))
 # img = img.save("CNN.jpg")
@@ -85,7 +85,7 @@ def favicon():
 @app.route('/download', methods=['POST'])
 def download_image():
     global image_counter
-    image_url = "http://192.168.1.65/action?go=takePhoto"
+    image_url = "http://192.168.1.64/action?go=takePhoto"
     response = requests.get(image_url)
     img = Image.open(BytesIO(response.content))
     # Generate the filename using the counter
@@ -100,7 +100,7 @@ def download_image():
     return "Image downloaded and saved as " + filename
 @app.route('/getServoAngle', methods=['POST'])
 def get_servoAngle():
-    servoAngle_url = "http://192.168.1.65/action?go=servoAngle"
+    servoAngle_url = "http://192.168.1.64/action?go=servoAngle"
     global servoAngle, image_counter
     servoAngle = requests.get(servoAngle_url).text
     # console.log(servoAngle)
@@ -111,7 +111,7 @@ def get_servoAngle():
     return servoAngle
 @app.route('/getLeftSpeed', methods=['POST'])
 def get_leftSpeed():
-    leftSpeed_url = "http://192.168.1.65/action?go=leftSpeed"
+    leftSpeed_url = "http://192.168.1.64/action?go=leftSpeed"
     leftSpeed = requests.get(leftSpeed_url).text
     # console.log(servoAngle)
     # if not isinstance(servoAngle,str):
@@ -121,7 +121,7 @@ def get_leftSpeed():
     return leftSpeed
 @app.route('/getRightSpeed', methods=['POST'])
 def get_rightSpeed():
-    rightSpeed_url = "http://192.168.1.65/action?go=rightSpeed"
+    rightSpeed_url = "http://192.168.1.64/action?go=rightSpeed"
     rightSpeed = requests.get(rightSpeed_url).text
     # console.log(servoAngle)
     # if not isinstance(servoAngle,str):
@@ -131,5 +131,6 @@ def get_rightSpeed():
     return rightSpeed
 
 if __name__ == '__main__':
+    # run app in debug mode on port 5000
     app.run()
 
