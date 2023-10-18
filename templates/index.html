@@ -41,13 +41,31 @@
         max-width: 100%;
         height: auto;
       }
+      /* Style the bounding box */
+      .bounding-box {
+        position: absolute;
+        border: 2px solid red;
+        /* box-sizing: border-box; */
+      }
+      .image-container {
+        position: relative;
+        display: inline-block;
+      }
+      .hidden {
+        display: none;
+      }
     </style>
     <!-- <link rel="stylesheet" href="https://pyscript.net/alpha/pyscript.css" />
     <script defer src="https://pyscript.net/alpha/pyscript.js"></script> -->
   </head>
   <body>
     <h1>ESP32-CAM Robot</h1>
-    <img src="" id="photo" />
+    <button class="button" id="btnPredict">Predict</button>
+    <div class="image-container">
+      <img src="" id="photo" />
+      <div id="boundingBox" class="bounding-box hidden"></div>
+    </div>
+
     <table>
       <tr>
         <td colspan="3" align="center">
@@ -155,6 +173,32 @@
         xhr.open("GET", "http://192.168.1.64/action?go=" + x, true);
         xhr.send();
       }
+      function requestESP32nFlask(
+        strBtnID,
+        strESP32EndPoint,
+        strFlaskEndPoint,
+        strIptID
+      ) {
+        document
+          .getElementById(strBtnID)
+          .addEventListener("click", function () {
+            toggleCheckbox(strESP32EndPoint);
+            // toggleCheckbox('servoAngle');
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "/" + strFlaskEndPoint, true);
+            xhr.setRequestHeader(
+              "Content-Type",
+              "application/x-www-form-urlencoded"
+            );
+            xhr.onreadystatechange = function () {
+              if (xhr.readyState === 4 && xhr.status === 200) {
+                document.getElementById(strIptID).value = xhr.responseText;
+              }
+            };
+            xhr.send();
+          });
+      }
+
       document
         .getElementById("btnTakePhoto")
         .addEventListener("click", function () {
@@ -172,109 +216,76 @@
           };
           xhr.send();
         });
+      imgLeftPos = document.getElementById("photo").style.left;
+      imgTopPos = document.getElementById("photo").style.top;
+      console.log(`Left: ${imgLeftPos}; Top: ${imgTopPos}`);
       document
-        .getElementById("btnLeftSpeedDecrease")
+        .getElementById("btnPredict")
         .addEventListener("click", function () {
-          toggleCheckbox("leftSpeedDecrease");
           var xhr = new XMLHttpRequest();
-          xhr.open("POST", "/getLeftSpeed", true);
+          xhr.open("POST", "/predict", true);
           xhr.setRequestHeader(
             "Content-Type",
             "application/x-www-form-urlencoded"
           );
           xhr.onreadystatechange = function () {
             if (xhr.readyState === 4 && xhr.status === 200) {
-              document.getElementById("iptLeftSpeed").value = xhr.responseText;
+              bbox = JSON.parse(xhr.response);
+              const htmlBoundingBox = document.getElementById("boundingBox");
+              console.log(bbox);
+              console.log();
+
+              // htmlBoundingBox.style.left = `${bbox[0] - bbox[2] / 2}px`;
+              // htmlBoundingBox.style.top = `${bbox[1] - bbox[3] / 2}px`;
+              // htmlBoundingBox.style.width = `${bbox[2]}px`;
+              // htmlBoundingBox.style.height = `${bbox[3]}px`;
+
+              htmlBoundingBox.style.left = `${bbox[0] - bbox[2] / 2}px`;
+              htmlBoundingBox.style.top = `${bbox[1] - bbox[3] / 2}px`;
+              htmlBoundingBox.style.width = `${bbox[2]}px`;
+              htmlBoundingBox.style.height = `${bbox[3]}px`;
+              htmlBoundingBox.classList.remove("hidden");
+              console.log(`Width: ${bbox[2]}`);
             }
           };
           xhr.send();
         });
-      document
-        .getElementById("btnLeftSpeedIncrease")
-        .addEventListener("click", function () {
-          toggleCheckbox("leftSpeedIncrease");
-          var xhr = new XMLHttpRequest();
-          xhr.open("POST", "/getLeftSpeed", true);
-          xhr.setRequestHeader(
-            "Content-Type",
-            "application/x-www-form-urlencoded"
-          );
-          xhr.onreadystatechange = function () {
-            if (xhr.readyState === 4 && xhr.status === 200) {
-              document.getElementById("iptLeftSpeed").value = xhr.responseText;
-            }
-          };
-          xhr.send();
-        });
-      document
-        .getElementById("btnRightSpeedDecrease")
-        .addEventListener("click", function () {
-          toggleCheckbox("rightSpeedDecrease");
-          var xhr = new XMLHttpRequest();
-          xhr.open("POST", "/getRightSpeed", true);
-          xhr.setRequestHeader(
-            "Content-Type",
-            "application/x-www-form-urlencoded"
-          );
-          xhr.onreadystatechange = function () {
-            if (xhr.readyState === 4 && xhr.status === 200) {
-              document.getElementById("iptRightSpeed").value = xhr.responseText;
-            }
-          };
-          xhr.send();
-        });
-      document
-        .getElementById("btnRightSpeedIncrease")
-        .addEventListener("click", function () {
-          toggleCheckbox("rightSpeedIncrease");
-          var xhr = new XMLHttpRequest();
-          xhr.open("POST", "/getRightSpeed", true);
-          xhr.setRequestHeader(
-            "Content-Type",
-            "application/x-www-form-urlencoded"
-          );
-          xhr.onreadystatechange = function () {
-            if (xhr.readyState === 4 && xhr.status === 200) {
-              document.getElementById("iptRightSpeed").value = xhr.responseText;
-            }
-          };
-          xhr.send();
-        });
-      document
-        .getElementById("btnServoLeft")
-        .addEventListener("click", function () {
-          toggleCheckbox("servoLeft");
-          var xhr = new XMLHttpRequest();
-          xhr.open("POST", "/getServoAngle", true);
-          xhr.setRequestHeader(
-            "Content-Type",
-            "application/x-www-form-urlencoded"
-          );
-          xhr.onreadystatechange = function () {
-            if (xhr.readyState === 4 && xhr.status === 200) {
-              document.getElementById("iptServoAngle").value = xhr.responseText;
-            }
-          };
-          xhr.send();
-        });
-      document
-        .getElementById("btnServoRight")
-        .addEventListener("click", function () {
-          toggleCheckbox("servoRight");
-          // toggleCheckbox('servoAngle');
-          var xhr = new XMLHttpRequest();
-          xhr.open("POST", "/getServoAngle", true);
-          xhr.setRequestHeader(
-            "Content-Type",
-            "application/x-www-form-urlencoded"
-          );
-          xhr.onreadystatechange = function () {
-            if (xhr.readyState === 4 && xhr.status === 200) {
-              document.getElementById("iptServoAngle").value = xhr.responseText;
-            }
-          };
-          xhr.send();
-        });
+      requestESP32nFlask(
+        "btnLeftSpeedDecrease",
+        "leftSpeedDecrease",
+        "getLeftSpeed",
+        "iptLeftSpeed"
+      );
+      requestESP32nFlask(
+        "btnLeftSpeedIncrease",
+        "leftSpeedIncrease",
+        "getLeftSpeed",
+        "iptLeftSpeed"
+      );
+      requestESP32nFlask(
+        "btnRightSpeedDecrease",
+        "rightSpeedDecrease",
+        "getRightSpeed",
+        "iptRightSpeed"
+      );
+      requestESP32nFlask(
+        "btnRightSpeedIncrease",
+        "rightSpeedIncrease",
+        "getRightSpeed",
+        "iptRightSpeed"
+      );
+      requestESP32nFlask(
+        "btnServoLeft",
+        "servoLeft",
+        "getServoAngle",
+        "iptServoAngle"
+      );
+      requestESP32nFlask(
+        "btnServoRight",
+        "servoRight",
+        "getServoAngle",
+        "iptServoAngle"
+      );
 
       window.onload = function () {
         document.getElementById("photo").src = "http://192.168.1.64:81/stream";

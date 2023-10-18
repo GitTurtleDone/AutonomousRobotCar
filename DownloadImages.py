@@ -52,11 +52,13 @@
 # img = img.save("CNN.jpg") 
 
 
-
+import numpy as np
 from flask import Flask, request, render_template
 from PIL import Image
 import requests
 from io import BytesIO
+from ultralytics import YOLO
+
 
 # image_url = "http://192.168.1.64/action?go=takePhoto"
 # response = requests.get(image_url)
@@ -70,6 +72,8 @@ image_counter = 1
 servoAngle = "135"
 leftSpeed = "255"
 rightSpeed = "255"
+
+model = YOLO('./runs/detect/train5/weights/best.pt')
 
 @app.route('/')
 def index():
@@ -98,6 +102,27 @@ def download_image():
     image_counter += 1
 
     return "Image downloaded and saved as " + filename
+@app.route('/predict', methods=['POST'])
+def predictImage():
+    global model
+    image_url = "http://192.168.1.64/action?go=takePhoto"
+    response = requests.get(image_url)
+    img = Image.open(BytesIO(response.content))
+    # Generate the filename using the counter
+    filename = f"PredictedImages/image.jpg"
+    img.save(filename)
+    # image_url = request.form['image_url']
+    # response = requests.get(image_url)
+    # img = Image.open(BytesIO(response.content))
+    # img.save("static/CNN.jpg")  # Save the image in a 'static' directory
+    results = model.predict(source=filename)
+    # msg = results[0].boxes.tostring()
+    bbox = results[0].boxes.xywh.cpu().numpy()[0].tolist()
+
+    return bbox
+
+
+
 @app.route('/getServoAngle', methods=['POST'])
 def get_servoAngle():
     servoAngle_url = "http://192.168.1.64/action?go=servoAngle"

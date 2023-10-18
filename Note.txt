@@ -7,3 +7,18 @@ Worked with DIO flash, haven't check back if it worked with QIO
 
 ultralytics version worked before 8.0.29
 current version 8.0.198
+
+Get 8.0.198 worked by removing the yalm file from inside the datasets folder to outside
+
+
+File "/home/giang/miniconda3/envs/yolo8/lib/python3.9/site-packages/flask/app.py", line 1071, in url_for
+    return self.handle_url_build_error(error, endpoint, values)
+  File "/home/giang/miniconda3/envs/yolo8/lib/python3.9/site-packages/flask/app.py", line 1060, in url_for
+    rv = url_adapter.build(  # type: ignore[union-attr]
+  File "/home/giang/miniconda3/envs/yolo8/lib/python3.9/site-packages/werkzeug/routing/map.py", line 919, in build
+    raise BuildError(endpoint, values, method, self)
+werkzeug.routing.exceptions.BuildError: Could not build url for endpoint 'PredictedImages' with values ['filename']. Did you mean 'download_image' instead?
+127.0.0.1 - - [18/Oct/2023 09:23:13] "GET / HTTP/1.1" 500 -
+127.0.0.1 - - [18/Oct/2023 09:23:13] "GET /favicon.ico HTTP/1.1" 204 -
+
+Class: tensor([[0.7404, 0.5973, 0.5067, 0.4994]], device='cuda:0')
