@@ -236,41 +236,43 @@
               //console.log(xhr.response);
               bboxes = JSON.parse(xhr.response);
               console.log(bboxes);
-              /**/
+              document.getElementById("vaseBB").classList.add("hidden");
+              document.getElementById("bookBB").classList.add("hidden");
+              document.getElementById("shoesBB").classList.add("hidden");
+
               var htmlBoundingBox = document.getElementById("vaseBB");
               var bbColor = "red";
-              for (let i = 0; i < bboxes[0].length; i++) {
-                if (bboxes[0][i] == 0) {
-                  htmlBoundingBox = document.getElementById("vaseBB");
 
-                  bbColor = "red";
-                  console.log(bboxes[0][i]);
-                  htmlBoundingBox.classList.remove("hidden");
-                } else if (bboxes[0][i] == 1) {
-                  htmlBoundingBox = document.getElementById("bookBB");
-                  bbColor = "green";
-                  htmlBoundingBox.classList.remove("hidden");
-                  console.log(bboxes[0][i]);
-                } else if (bboxes[0][i] == 2) {
-                  htmlBoundingBox = document.getElementById("shoesBB");
-                  htmlBoundingBox.classList.remove("hidden");
-                  bbColor = "blue";
-                  console.log(bboxes[0][i]);
-                } else {
-                  console.log("Not detected");
+              if (bboxes[0].length > 0) {
+                for (let i = 0; i < bboxes[0].length; i++) {
+                  if (bboxes[0][i] == 0) {
+                    htmlBoundingBox = document.getElementById("vaseBB");
+                    bbColor = "red";
+                    htmlBoundingBox.classList.remove("hidden");
+                  } else if (bboxes[0][i] == 1) {
+                    htmlBoundingBox = document.getElementById("bookBB");
+                    bbColor = "green";
+                    htmlBoundingBox.classList.remove("hidden");
+                  } else if (bboxes[0][i] == 2) {
+                    htmlBoundingBox = document.getElementById("shoesBB");
+                    htmlBoundingBox.classList.remove("hidden");
+                    bbColor = "blue";
+                  }
+                  console.log(`i: ${i}`);
+                  htmlBoundingBox.style.left = `${
+                    bboxes[2][i][0] - bboxes[2][i][2] / 2
+                  }px`;
+                  htmlBoundingBox.style.top = `${
+                    bboxes[2][i][1] - bboxes[2][i][3] / 2
+                  }px`;
+                  htmlBoundingBox.style.width = `${bboxes[2][i][2]}px`;
+                  htmlBoundingBox.style.height = `${bboxes[2][i][3]}px`;
+                  htmlBoundingBox.style.borderColor = bbColor;
                 }
-                console.log(`i: ${i}`);
-                htmlBoundingBox.style.left = `${
-                  bboxes[2][i][0] - bboxes[2][i][2] / 2
-                }px`;
-                htmlBoundingBox.style.top = `${
-                  bboxes[2][i][1] - bboxes[2][i][3] / 2
-                }px`;
-                htmlBoundingBox.style.width = `${bboxes[2][i][2]}px`;
-                htmlBoundingBox.style.height = `${bboxes[2][i][3]}px`;
-                htmlBoundingBox.style.borderColor = bbColor;
+              } else {
+                console.log("No Objects detected");
               }
-
+            }
           };
           xhr.send();
         });
