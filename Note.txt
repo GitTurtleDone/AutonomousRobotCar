@@ -22,3 +22,5 @@ werkzeug.routing.exceptions.BuildError: Could not build url for endpoint 'Predic
 127.0.0.1 - - [18/Oct/2023 09:23:13] "GET /favicon.ico HTTP/1.1" 204 -
 
 Class: tensor([[0.7404, 0.5973, 0.5067, 0.4994]], device='cuda:0')
+
+yolo predict model=yolov8s.pt source="http://192.168.1.64/action?go=takePhoto"

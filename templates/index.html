@@ -44,7 +44,8 @@
       /* Style the bounding box */
       .bounding-box {
         position: absolute;
-        border: 2px solid red;
+        /* border-width: 2px; */
+        border: 2px solid;
         /* box-sizing: border-box; */
       }
       .image-container {
@@ -63,7 +64,9 @@
     <button class="button" id="btnPredict">Predict</button>
     <div class="image-container">
       <img src="" id="photo" />
-      <div id="boundingBox" class="bounding-box hidden"></div>
+      <div id="vaseBB" class="bounding-box hidden"></div>
+      <div id="bookBB" class="bounding-box hidden"></div>
+      <div id="shoesBB" class="bounding-box hidden"></div>
     </div>
 
     <table>
@@ -230,23 +233,44 @@
           );
           xhr.onreadystatechange = function () {
             if (xhr.readyState === 4 && xhr.status === 200) {
-              bbox = JSON.parse(xhr.response);
-              const htmlBoundingBox = document.getElementById("boundingBox");
-              console.log(bbox);
-              console.log();
+              //console.log(xhr.response);
+              bboxes = JSON.parse(xhr.response);
+              console.log(bboxes);
+              /**/
+              var htmlBoundingBox = document.getElementById("vaseBB");
+              var bbColor = "red";
+              for (let i = 0; i < bboxes[0].length; i++) {
+                if (bboxes[0][i] == 0) {
+                  htmlBoundingBox = document.getElementById("vaseBB");
 
-              // htmlBoundingBox.style.left = `${bbox[0] - bbox[2] / 2}px`;
-              // htmlBoundingBox.style.top = `${bbox[1] - bbox[3] / 2}px`;
-              // htmlBoundingBox.style.width = `${bbox[2]}px`;
-              // htmlBoundingBox.style.height = `${bbox[3]}px`;
+                  bbColor = "red";
+                  console.log(bboxes[0][i]);
+                  htmlBoundingBox.classList.remove("hidden");
+                } else if (bboxes[0][i] == 1) {
+                  htmlBoundingBox = document.getElementById("bookBB");
+                  bbColor = "green";
+                  htmlBoundingBox.classList.remove("hidden");
+                  console.log(bboxes[0][i]);
+                } else if (bboxes[0][i] == 2) {
+                  htmlBoundingBox = document.getElementById("shoesBB");
+                  htmlBoundingBox.classList.remove("hidden");
+                  bbColor = "blue";
+                  console.log(bboxes[0][i]);
+                } else {
+                  console.log("Not detected");
+                }
+                console.log(`i: ${i}`);
+                htmlBoundingBox.style.left = `${
+                  bboxes[2][i][0] - bboxes[2][i][2] / 2
+                }px`;
+                htmlBoundingBox.style.top = `${
+                  bboxes[2][i][1] - bboxes[2][i][3] / 2
+                }px`;
+                htmlBoundingBox.style.width = `${bboxes[2][i][2]}px`;
+                htmlBoundingBox.style.height = `${bboxes[2][i][3]}px`;
+                htmlBoundingBox.style.borderColor = bbColor;
+              }
 
-              htmlBoundingBox.style.left = `${bbox[0] - bbox[2] / 2}px`;
-              htmlBoundingBox.style.top = `${bbox[1] - bbox[3] / 2}px`;
-              htmlBoundingBox.style.width = `${bbox[2]}px`;
-              htmlBoundingBox.style.height = `${bbox[3]}px`;
-              htmlBoundingBox.classList.remove("hidden");
-              console.log(`Width: ${bbox[2]}`);
-            }
           };
           xhr.send();
         });

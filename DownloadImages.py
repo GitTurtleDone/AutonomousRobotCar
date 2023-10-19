@@ -109,17 +109,24 @@ def predictImage():
     response = requests.get(image_url)
     img = Image.open(BytesIO(response.content))
     # Generate the filename using the counter
-    filename = f"PredictedImages/image.jpg"
+    filename = f"./PredictedImages/image.jpg"
     img.save(filename)
     # image_url = request.form['image_url']
     # response = requests.get(image_url)
     # img = Image.open(BytesIO(response.content))
     # img.save("static/CNN.jpg")  # Save the image in a 'static' directory
-    results = model.predict(source=filename)
+    result = model.predict(source="./PredictedImages/image.jpg", classes=None, conf=0.5)
     # msg = results[0].boxes.tostring()
-    bbox = results[0].boxes.xywh.cpu().numpy()[0].tolist()
+    # bboxes = []
+    # for result in results:
+    #     #bboxes.append([result.boxes.id.cpu().numpy()[0].tolist(),result.boxes.xywh.cpu().numpy()[0].tolist()])
+    #     bboxes.append([result.boxes.cls.cpu().numpy()[0].tolist()])#,result.boxes.xywh.cpu().numpy()[0].tolist()
 
-    return bbox
+
+    # return bboxes
+    return ([result[0].boxes.cls.cpu().numpy().tolist(),
+            result[0].boxes.conf.cpu().numpy().tolist(),
+            result[0].boxes.xywh.cpu().numpy().tolist()])
 
 
 
