@@ -1,7 +1,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>ESP32-CAM Robot</title>
+    <title>Autonomous Robot Car</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <style>
       body {
@@ -45,7 +45,7 @@
       .bounding-box {
         position: absolute;
         /* border-width: 2px; */
-        border: 2px solid;
+        border: 4px solid;
         /* box-sizing: border-box; */
       }
       .image-container {
@@ -60,8 +60,8 @@
     <script defer src="https://pyscript.net/alpha/pyscript.js"></script> -->
   </head>
   <body>
-    <h1>ESP32-CAM Robot</h1>
-    <button class="button" id="btnPredict">Predict</button>
+    <h1>Autonomous Robot Car</h1>
+
     <div class="image-container">
       <img src="" id="photo" />
       <div id="vaseBB" class="bounding-box hidden"></div>
@@ -70,6 +70,25 @@
     </div>
 
     <table>
+      <tr>
+        <td colspan="3" align="center">
+          <button class="button" id="btnPredict">Predict Once</button>
+          <button class="button" id="btnStreamPrediction">
+            Stream Prediction
+          </button>
+          <button class="button" id="btnStopStreamPrediction">
+            Stop Stream Prediction
+          </button>
+        </td>
+      </tr>
+      <tr>
+        <td colspan="2" align="center">
+          <button class="button" id="btnRunAuto">Run autonomously</button>
+          <button class="button" id="btnStopRunAuto">
+            Stop run autonomously
+          </button>
+        </td>
+      </tr>
       <tr>
         <td colspan="3" align="center">
           <button
@@ -131,7 +150,6 @@
       </tr>
       <tr>
         <td colspan="3" align="center">
-          <!-- <button class="button" onclick="capturePhoto();">Take a photo</button> -->
           <button class="button" id="btnTakePhoto">
             Take and Save a Photo
           </button>
@@ -175,6 +193,7 @@
         var xhr = new XMLHttpRequest();
         xhr.open("GET", "http://192.168.1.64/action?go=" + x, true);
         xhr.send();
+        if (!streamPredictionEnable) setTimeout(predictOnce, 100);
       }
       function requestESP32nFlask(
         strBtnID,
@@ -201,6 +220,63 @@
             xhr.send();
           });
       }
+      // Draw bounding boxes around detected objects on the image element upon receiving a response from yolo8
+
+      function drawBB(bboxes) {
+        document.getElementById("vaseBB").classList.add("hidden");
+        document.getElementById("bookBB").classList.add("hidden");
+        document.getElementById("shoesBB").classList.add("hidden");
+
+        var htmlBoundingBox = document.getElementById("vaseBB");
+        var bbColor = "red";
+
+        if (bboxes[0].length > 0) {
+          for (let i = 0; i < bboxes[0].length; i++) {
+            if (bboxes[0][i] == 0) {
+              htmlBoundingBox = document.getElementById("vaseBB");
+              bbColor = "red";
+              htmlBoundingBox.classList.remove("hidden");
+            } else if (bboxes[0][i] == 1) {
+              htmlBoundingBox = document.getElementById("bookBB");
+              bbColor = "green";
+              htmlBoundingBox.classList.remove("hidden");
+            } else if (bboxes[0][i] == 2) {
+              htmlBoundingBox = document.getElementById("shoesBB");
+              htmlBoundingBox.classList.remove("hidden");
+              bbColor = "blue";
+            }
+            htmlBoundingBox.style.left = `${
+              bboxes[2][i][0] - bboxes[2][i][2] / 2
+            }px`;
+            htmlBoundingBox.style.top = `${
+              bboxes[2][i][1] - bboxes[2][i][3] / 2
+            }px`;
+            htmlBoundingBox.style.width = `${bboxes[2][i][2]}px`;
+            htmlBoundingBox.style.height = `${bboxes[2][i][3]}px`;
+            htmlBoundingBox.style.borderColor = bbColor;
+          }
+        } else {
+          console.log("No objects detected");
+        }
+      }
+      // Make a request to yolo8 to predict an image then draw bounding boxes around the detected objects
+      function predictOnce() {
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", "/predict", true);
+        xhr.setRequestHeader(
+          "Content-Type",
+          "application/x-www-form-urlencoded"
+        );
+        xhr.onreadystatechange = function () {
+          if (xhr.readyState === 4 && xhr.status === 200) {
+            //console.log(xhr.response);
+            bboxes = JSON.parse(xhr.response);
+            console.log(bboxes);
+            drawBB(bboxes);
+          }
+        };
+        xhr.send();
+      }
 
       document
         .getElementById("btnTakePhoto")
@@ -225,57 +301,57 @@
       document
         .getElementById("btnPredict")
         .addEventListener("click", function () {
-          var xhr = new XMLHttpRequest();
-          xhr.open("POST", "/predict", true);
-          xhr.setRequestHeader(
-            "Content-Type",
-            "application/x-www-form-urlencoded"
-          );
-          xhr.onreadystatechange = function () {
-            if (xhr.readyState === 4 && xhr.status === 200) {
-              //console.log(xhr.response);
-              bboxes = JSON.parse(xhr.response);
-              console.log(bboxes);
-              document.getElementById("vaseBB").classList.add("hidden");
-              document.getElementById("bookBB").classList.add("hidden");
-              document.getElementById("shoesBB").classList.add("hidden");
-
-              var htmlBoundingBox = document.getElementById("vaseBB");
-              var bbColor = "red";
-
-              if (bboxes[0].length > 0) {
-                for (let i = 0; i < bboxes[0].length; i++) {
-                  if (bboxes[0][i] == 0) {
-                    htmlBoundingBox = document.getElementById("vaseBB");
-                    bbColor = "red";
-                    htmlBoundingBox.classList.remove("hidden");
-                  } else if (bboxes[0][i] == 1) {
-                    htmlBoundingBox = document.getElementById("bookBB");
-                    bbColor = "green";
-                    htmlBoundingBox.classList.remove("hidden");
-                  } else if (bboxes[0][i] == 2) {
-                    htmlBoundingBox = document.getElementById("shoesBB");
-                    htmlBoundingBox.classList.remove("hidden");
-                    bbColor = "blue";
-                  }
-                  console.log(`i: ${i}`);
-                  htmlBoundingBox.style.left = `${
-                    bboxes[2][i][0] - bboxes[2][i][2] / 2
-                  }px`;
-                  htmlBoundingBox.style.top = `${
-                    bboxes[2][i][1] - bboxes[2][i][3] / 2
-                  }px`;
-                  htmlBoundingBox.style.width = `${bboxes[2][i][2]}px`;
-                  htmlBoundingBox.style.height = `${bboxes[2][i][3]}px`;
-                  htmlBoundingBox.style.borderColor = bbColor;
-                }
-              } else {
-                console.log("No Objects detected");
-              }
-            }
-          };
-          xhr.send();
+          predictOnce();
         });
+      let streamPredictionEnable = false;
+      document
+        .getElementById("btnStreamPrediction")
+        .addEventListener("click", function () {
+          streamPredictionEnable = true;
+          streamPrediction();
+        });
+      document
+        .getElementById("btnStopStreamPrediction")
+        .addEventListener("click", function () {
+          streamPredictionEnable = false;
+        });
+
+      function streamPrediction() {
+        const timeInterval = 200;
+        function loopIteration() {
+          if (streamPredictionEnable) {
+            predictOnce();
+            setTimeout(loopIteration, timeInterval); // Break the loop to avoid blocking the main thread
+          }
+        }
+        loopIteration();
+      }
+
+      let runAutoEnable = false;
+      document
+        .getElementById("btnRunAuto")
+        .addEventListener("click", function () {
+          runAutoEnable = true;
+          streamPredictionEnable = false;
+          runAuto();
+        });
+      document
+        .getElementById("btnStopRunAuto")
+        .addEventListener("click", function () {
+          runAutoEnable = false;
+        });
+
+      function runAuto() {
+        const timeInterval = 200;
+        function loopIteration() {
+          if (runAutoEnable) {
+            predictOnce();
+            setTimeout(loopIteration, timeInterval); // Break the loop to avoid blocking the main thread
+          }
+        }
+        loopIteration();
+      }
+
       requestESP32nFlask(
         "btnLeftSpeedDecrease",
         "leftSpeedDecrease",
@@ -315,6 +391,7 @@
 
       window.onload = function () {
         document.getElementById("photo").src = "http://192.168.1.64:81/stream";
+        predictOnce();
       };
     </script>
   </body>

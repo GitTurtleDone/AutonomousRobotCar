@@ -24,3 +24,8 @@ werkzeug.routing.exceptions.BuildError: Could not build url for endpoint 'Predic
 Class: tensor([[0.7404, 0.5973, 0.5067, 0.4994]], device='cuda:0')
 
 yolo predict model=yolov8s.pt source="http://192.168.1.64/action?go=takePhoto"
+
+Major problems:
+- Save image to a computer
+- Retrieve results from yolo predictions
+- Ansychornous javascript
