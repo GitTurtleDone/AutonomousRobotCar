@@ -123,10 +123,10 @@ def predictImage():
     #     bboxes.append([result.boxes.cls.cpu().numpy()[0].tolist()])#,result.boxes.xywh.cpu().numpy()[0].tolist()
 
 
-    # return bboxes
+    # return bboxes, the last line contains coordinates in percentage
     return ([result[0].boxes.cls.cpu().numpy().tolist(),
             result[0].boxes.conf.cpu().numpy().tolist(),
-            result[0].boxes.xywh.cpu().numpy().tolist()])
+            (result[0].boxes.xywhn.cpu().numpy() *100).tolist()]) 
 
 
 

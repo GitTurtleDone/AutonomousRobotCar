@@ -221,7 +221,12 @@
           });
       }
       // Draw bounding boxes around detected objects on the image element upon receiving a response from yolo8
-
+      const alertMessage = [
+        "No object detected",
+        "Object detected",
+        "Closing",
+        "Stop",
+      ];
       function drawBB(bboxes) {
         document.getElementById("vaseBB").classList.add("hidden");
         document.getElementById("bookBB").classList.add("hidden");
@@ -229,9 +234,18 @@
 
         var htmlBoundingBox = document.getElementById("vaseBB");
         var bbColor = "red";
+        let returnMessage = "";
+        let leftMostPos = 100;
+        let rightMostPos = 0;
+        let bottomMostPos = 0;
+        let maxWidth = 0;
+        let closingLimit = 60;
+        let stopLimit = 90;
 
         if (bboxes[0].length > 0) {
           for (let i = 0; i < bboxes[0].length; i++) {
+            returnMessage = alertMessage[1];
+            //------------------Drawing the bounding box --------------------------
             if (bboxes[0][i] == 0) {
               htmlBoundingBox = document.getElementById("vaseBB");
               bbColor = "red";
@@ -247,21 +261,51 @@
             }
             htmlBoundingBox.style.left = `${
               bboxes[2][i][0] - bboxes[2][i][2] / 2
-            }px`;
+            }%`;
             htmlBoundingBox.style.top = `${
               bboxes[2][i][1] - bboxes[2][i][3] / 2
-            }px`;
-            htmlBoundingBox.style.width = `${bboxes[2][i][2]}px`;
-            htmlBoundingBox.style.height = `${bboxes[2][i][3]}px`;
+            }%`;
+            htmlBoundingBox.style.width = `${bboxes[2][i][2]}%`;
+            htmlBoundingBox.style.height = `${bboxes[2][i][3]}%`;
             htmlBoundingBox.style.borderColor = bbColor;
+
+            //------------------Returning Info for control--------------------------
+            maxWidth = maxWidth < bboxes[2][i][2] ? bboxes[2][i][2] : maxWidth;
+            bottomMostPos =
+              bottomMostPos < bboxes[2][i][1] + bboxes[2][i][3] / 2
+                ? bboxes[2][i][1] + bboxes[2][i][3] / 2
+                : bottomMostPos;
+            leftMostPos =
+              leftMostPos > bboxes[2][i][0] - bboxes[2][i][2] / 2
+                ? bboxes[2][i][0] - bboxes[2][i][2] / 2
+                : leftMostPos;
+            rightMostPos =
+              rightMostPos < bboxes[2][i][0] + bboxes[2][i][2] / 2
+                ? bboxes[2][i][0] + bboxes[2][i][2] / 2
+                : rightMostPos;
           }
         } else {
-          console.log("No objects detected");
+          returnMessage = alertMessage[0];
         }
+        if (returnMessage != alertMessage[0]) {
+          if (bottomMostPos > closingLimit) {
+            returnMessage =
+              bottomMostPos > stopLimit ? alertMessage[3] : alertMessage[2];
+          }
+        }
+        return [
+          returnMessage,
+          leftMostPos,
+          rightMostPos,
+          bottomMostPos,
+          maxWidth,
+        ];
       }
       // Make a request to yolo8 to predict an image then draw bounding boxes around the detected objects
+      let returnInfo = ["Stop", 0, 100, 100, 100];
       function predictOnce() {
         var xhr = new XMLHttpRequest();
+
         xhr.open("POST", "/predict", true);
         xhr.setRequestHeader(
           "Content-Type",
@@ -271,8 +315,8 @@
           if (xhr.readyState === 4 && xhr.status === 200) {
             //console.log(xhr.response);
             bboxes = JSON.parse(xhr.response);
-            console.log(bboxes);
-            drawBB(bboxes);
+            returnInfo = drawBB(bboxes);
+            console.log(`predicted Once: ${returnInfo}`);
           }
         };
         xhr.send();
@@ -295,9 +339,6 @@
           };
           xhr.send();
         });
-      imgLeftPos = document.getElementById("photo").style.left;
-      imgTopPos = document.getElementById("photo").style.top;
-      console.log(`Left: ${imgLeftPos}; Top: ${imgTopPos}`);
       document
         .getElementById("btnPredict")
         .addEventListener("click", function () {
@@ -313,7 +354,18 @@
       document
         .getElementById("btnStopStreamPrediction")
         .addEventListener("click", function () {
-          streamPredictionEnable = false;
+          function assertStop() {
+            if (streamPredictionEnable) {
+              streamPredictionEnable = false;
+            } else {
+              if (i < 100) {
+                setTimeout(assertStop, 10);
+                i++;
+              }
+            }
+          }
+          let i = 0;
+          assertStop();
         });
 
       function streamPrediction() {
@@ -338,7 +390,18 @@
       document
         .getElementById("btnStopRunAuto")
         .addEventListener("click", function () {
-          runAutoEnable = false;
+          function assertStop() {
+            if (runAutoEnable) {
+              runAutoEnable = false;
+            } else {
+              if (i < 100) {
+                setTimeout(assertStop, 10);
+                i++;
+              }
+            }
+          }
+          let i = 0;
+          assertStop();
         });
 
       function runAuto() {
@@ -346,7 +409,38 @@
         function loopIteration() {
           if (runAutoEnable) {
             predictOnce();
-            setTimeout(loopIteration, timeInterval); // Break the loop to avoid blocking the main thread
+            console.log(`returnInfo: ${returnInfo}`);
+            switch (returnInfo[0]) {
+              case alertMessage[0]:
+                console.log("Auto: No object");
+                toggleCheckbox("forward");
+                break;
+              case alertMessage[1]:
+                console.log("Auto: Object detected");
+                toggleCheckbox("forward");
+                break;
+              case alertMessage[2]:
+                console.log("Auto: Closing");
+                requestESP32nFlask(
+                  "btnLeftSpeedDecrease",
+                  "leftSpeedDecrease",
+                  "getLeftSpeed",
+                  "iptLeftSpeed"
+                );
+                requestESP32nFlask(
+                  "btnRightSpeedDecrease",
+                  "rightSpeedDecrease",
+                  "getRightSpeed",
+                  "iptRightSpeed"
+                );
+                toggleCheckbox("forward");
+                break;
+              case alertMessage[3]:
+                console.log("Auto: Stop");
+                toggleCheckbox("stop");
+                break;
+            }
+            setTimeout(loopIteration, timeInterval);
           }
         }
         loopIteration();
@@ -389,9 +483,12 @@
         "iptServoAngle"
       );
 
-      window.onload = function () {
-        document.getElementById("photo").src = "http://192.168.1.64:81/stream";
-        predictOnce();
+      window.onload = async function () {
+        const camImage = document.getElementById("photo");
+        //console.log(`Top: ${camImage.style.top}; Left: ${camImage.style.left}`);
+        camImage.src = "http://192.168.1.64:81/stream";
+
+        await predictOnce();
       };
     </script>
   </body>
