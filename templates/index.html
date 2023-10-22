@@ -333,8 +333,7 @@
           );
           xhr.onreadystatechange = function () {
             if (xhr.readyState === 4 && xhr.status === 200) {
-              document.getElementById("responseMessage").textContent =
-                xhr.responseText;
+              console.log("Image captured");
             }
           };
           xhr.send();
