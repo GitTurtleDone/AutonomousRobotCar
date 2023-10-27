@@ -1,0 +1,19 @@
+train: SurroundingObjects/train/images
+val: SurroundingObjects/val/images
+
+nc: 12
+names:
+  [
+    "Empty",
+    "Vase",
+    "Book",
+    "Shoes",
+    "Wall 1",
+    "Wall 2",
+    "Chair Foot",
+    "Column",
+    "Drawer",
+    "Rubbish Bin",
+    "Boxes",
+    "Table Foot",
+  ]

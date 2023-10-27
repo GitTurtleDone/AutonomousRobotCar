@@ -1,0 +1,12 @@
+Empty
+Vase
+Book
+Shoes
+Wall 1
+Wall 2
+Chair Foot
+Column
+Drawer
+Rubbish Bin
+Boxes
+Table Foot
