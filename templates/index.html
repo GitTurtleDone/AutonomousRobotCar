@@ -64,18 +64,6 @@
 
     <div id="image-container">
       <img src="" id="photo" />
-      <!-- <div id="emptyBB" class="bounding-box hidden"></div>
-      <div id="vaseBB" class="bounding-box hidden"></div>
-      <div id="bookBB" class="bounding-box hidden"></div>
-      <div id="shoesBB" class="bounding-box hidden"></div>
-      <div id="wall1BB" class="bounding-box hidden"></div>
-      <div id="wall2BB" class="bounding-box hidden"></div>
-      <div id="chairFootBB" class="bounding-box hidden"></div>
-      <div id="columnBB" class="bounding-box hidden"></div>
-      <div id="drawerBB" class="bounding-box hidden"></div>
-      <div id="rubbishBinBB" class="bounding-box hidden"></div>
-      <div id="boxesBB" class="bounding-box hidden"></div>
-      <div id="tableFootBB" class="bounding-box hidden"></div> -->
     </div>
 
     <table>
@@ -99,6 +87,17 @@
         </td>
       </tr>
       <tr>
+        <td align="center">
+          <button
+            class="button"
+            onmousedown="toggleCheckbox('veerLeft');"
+            ontouchstart="toggleCheckbox('veerLeft');"
+            onmouseup="toggleCheckbox('stop');"
+            ontouchend="toggleCheckbox('stop');"
+          >
+            Veer Left
+          </button>
+        </td>
         <td colspan="3" align="center">
           <button
             class="button"
@@ -108,6 +107,17 @@
             ontouchend="toggleCheckbox('stop');"
           >
             Forward
+          </button>
+        </td>
+        <td align="center">
+          <button
+            class="button"
+            onmousedown="toggleCheckbox('veerRight');"
+            ontouchstart="toggleCheckbox('veerRight');"
+            onmouseup="toggleCheckbox('stop');"
+            ontouchend="toggleCheckbox('stop');"
+          >
+            Veer Right
           </button>
         </td>
       </tr>
@@ -145,6 +155,17 @@
         </td>
       </tr>
       <tr>
+        <td align="center">
+          <button
+            class="button"
+            onmousedown="toggleCheckbox('reverseLeft');"
+            ontouchstart="toggleCheckbox('reverseLeft');"
+            onmouseup="toggleCheckbox('stop');"
+            ontouchend="toggleCheckbox('stop');"
+          >
+            Reverse Left
+          </button>
+        </td>
         <td colspan="3" align="center">
           <button
             class="button"
@@ -154,6 +175,17 @@
             ontouchend="toggleCheckbox('stop');"
           >
             Backward
+          </button>
+        </td>
+        <td align="center">
+          <button
+            class="button"
+            onmousedown="toggleCheckbox('reverseRight');"
+            ontouchstart="toggleCheckbox('reverseRight');"
+            onmouseup="toggleCheckbox('stop');"
+            ontouchend="toggleCheckbox('stop');"
+          >
+            Veer Right
           </button>
         </td>
       </tr>
@@ -328,19 +360,22 @@
             htmlBoundingBox.style.borderColor = bbColor;
 
             //------------------Returning Info for control--------------------------
-            maxWidth = maxWidth < bboxes[2][i][2] ? bboxes[2][i][2] : maxWidth;
-            bottomMostPos =
-              bottomMostPos < bboxes[2][i][1] + bboxes[2][i][3] / 2
-                ? bboxes[2][i][1] + bboxes[2][i][3] / 2
-                : bottomMostPos;
-            leftMostPos =
-              leftMostPos > bboxes[2][i][0] - bboxes[2][i][2] / 2
-                ? bboxes[2][i][0] - bboxes[2][i][2] / 2
-                : leftMostPos;
-            rightMostPos =
-              rightMostPos < bboxes[2][i][0] + bboxes[2][i][2] / 2
-                ? bboxes[2][i][0] + bboxes[2][i][2] / 2
-                : rightMostPos;
+            if (bboxes[0][i] != 0) {
+              maxWidth =
+                maxWidth < bboxes[2][i][2] ? bboxes[2][i][2] : maxWidth;
+              bottomMostPos =
+                bottomMostPos < bboxes[2][i][1] + bboxes[2][i][3] / 2
+                  ? bboxes[2][i][1] + bboxes[2][i][3] / 2
+                  : bottomMostPos;
+              leftMostPos =
+                leftMostPos > bboxes[2][i][0] - bboxes[2][i][2] / 2
+                  ? bboxes[2][i][0] - bboxes[2][i][2] / 2
+                  : leftMostPos;
+              rightMostPos =
+                rightMostPos < bboxes[2][i][0] + bboxes[2][i][2] / 2
+                  ? bboxes[2][i][0] + bboxes[2][i][2] / 2
+                  : rightMostPos;
+            }
           }
         } else {
           returnMessage = alertMessage[0];
@@ -494,7 +529,50 @@
                 break;
               case alertMessage[3]:
                 console.log("Auto: Stop");
+                // function assertStop() {
+                //   if (runAutoEnable == true) {
+                //     runAutoEnable = false;
+                //     toggleCheckbox("stop");
+                //   } else {
+                //     if (j < 100) {
+                //       setTimeout(assertStop, 10);
+                //       j++;
+                //     }
+                //   }
+                // }
+                // let j = 0;
+                // assertStop();
+                toggleCheckbox("backward");
                 toggleCheckbox("stop");
+                toggleCheckbox("backward");
+                toggleCheckbox("stop");
+                toggleCheckbox("veerLeft");
+                toggleCheckbox("stop");
+                // function assertContinue() {
+                //   if (runAutoEnable == false) {
+                //     runAutoEnable = true;
+                //   } else {
+                //     if (k < 100) {
+                //       setTimeout(assertContinue, 10);
+                //       k++;
+                //     }
+                //   }
+                // }
+                // let k = 0;
+
+                if (returnInfo[0] == alertMessage[3]) {
+                  //   assertContinue();
+                  // } else {
+                  toggleCheckbox("backward");
+                  toggleCheckbox("stop");
+                  toggleCheckbox("veerRight");
+                  toggleCheckbox("stop");
+                  // k = 0;
+                  // if (returnInfo[0] != alertMessage[3]) {
+                  //   assertContinue();
+                  //}
+                }
+
                 break;
             }
             setTimeout(loopIteration, timeInterval);

@@ -350,6 +350,20 @@ static esp_err_t cmd_handler(httpd_req_t *req){
     analogWrite(MOTOR_2_PIN_1, rightSpeed);
     analogWrite(MOTOR_2_PIN_2, 0);
   }
+   else if(!strcmp(variable, "veerLeft")) {
+    Serial.println("Veer Left");
+    analogWrite(MOTOR_1_PIN_1, 0);
+    analogWrite(MOTOR_1_PIN_2, 0);
+    analogWrite(MOTOR_2_PIN_1, rightSpeed);
+    analogWrite(MOTOR_2_PIN_2, 0);
+  }
+  else if(!strcmp(variable, "veerRight")) {
+    Serial.println("Veer Right");
+    analogWrite(MOTOR_1_PIN_1, leftSpeed);
+    analogWrite(MOTOR_1_PIN_2, 0);
+    analogWrite(MOTOR_2_PIN_1, 0);
+    analogWrite(MOTOR_2_PIN_2, 0);
+  }
   else if(!strcmp(variable, "left")) {
     Serial.println("Left");
     analogWrite(MOTOR_1_PIN_1, 0);
@@ -370,6 +384,20 @@ static esp_err_t cmd_handler(httpd_req_t *req){
     analogWrite(MOTOR_1_PIN_2, leftSpeed);
     analogWrite(MOTOR_2_PIN_1, 0);
     analogWrite(MOTOR_2_PIN_2, rightSpeed);
+  }
+   else if(!strcmp(variable, "reverseLeft")) {
+    Serial.println("Reverse Left");
+    analogWrite(MOTOR_1_PIN_1, 0);
+    analogWrite(MOTOR_1_PIN_2, 0);
+    analogWrite(MOTOR_2_PIN_1, 0);
+    analogWrite(MOTOR_2_PIN_2, rightSpeed);
+  }
+  else if(!strcmp(variable, "reverseRight")) {
+    Serial.println("Reverse Right");
+    analogWrite(MOTOR_1_PIN_1, 0);
+    analogWrite(MOTOR_1_PIN_2, rightSpeed);
+    analogWrite(MOTOR_2_PIN_1, 0);
+    analogWrite(MOTOR_2_PIN_2, 0);
   }
 
   else if(!strcmp(variable, "stop")) {
@@ -578,7 +606,7 @@ void setup() {
   //servoN2.attach(16, 1000, 2000);
 
   myServo.setPeriodHertz(50);
-  myServo.attach(servoPin, 1000, 2000);
+  myServo.attach(servoPin, 700, 2400);
   myServo.write(servoPos);
   
   Serial.begin(115200);
