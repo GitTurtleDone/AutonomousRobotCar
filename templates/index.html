@@ -48,7 +48,7 @@
         border: 4px solid;
         /* box-sizing: border-box; */
       }
-      .image-container {
+      #image-container {
         position: relative;
         display: inline-block;
       }
@@ -62,11 +62,20 @@
   <body>
     <h1>Autonomous Robot Car</h1>
 
-    <div class="image-container">
+    <div id="image-container">
       <img src="" id="photo" />
+      <!-- <div id="emptyBB" class="bounding-box hidden"></div>
       <div id="vaseBB" class="bounding-box hidden"></div>
       <div id="bookBB" class="bounding-box hidden"></div>
       <div id="shoesBB" class="bounding-box hidden"></div>
+      <div id="wall1BB" class="bounding-box hidden"></div>
+      <div id="wall2BB" class="bounding-box hidden"></div>
+      <div id="chairFootBB" class="bounding-box hidden"></div>
+      <div id="columnBB" class="bounding-box hidden"></div>
+      <div id="drawerBB" class="bounding-box hidden"></div>
+      <div id="rubbishBinBB" class="bounding-box hidden"></div>
+      <div id="boxesBB" class="bounding-box hidden"></div>
+      <div id="tableFootBB" class="bounding-box hidden"></div> -->
     </div>
 
     <table>
@@ -227,13 +236,47 @@
         "Closing",
         "Stop",
       ];
+      const clsNames = [
+        "empty",
+        "vase",
+        "book",
+        "shoes",
+        "wall1",
+        "wall2",
+        "chairFoot",
+        "column",
+        "drawer",
+        "rubbishBin",
+        "boxes",
+        "tableFoot",
+      ];
+      // colors of the bounding boxes around the class
+      const bbColors = [
+        "white",
+        "black",
+        "red",
+        "green",
+        "blue",
+        "violet",
+        "pink",
+        "grey",
+        "orange",
+        "LawnGreen",
+        "LightSkyBlue",
+        "purple",
+      ];
+      const clsNumber = clsNames.length; // get the class numbers
       function drawBB(bboxes) {
-        document.getElementById("vaseBB").classList.add("hidden");
-        document.getElementById("bookBB").classList.add("hidden");
-        document.getElementById("shoesBB").classList.add("hidden");
-
-        var htmlBoundingBox = document.getElementById("vaseBB");
-        var bbColor = "red";
+        // for (let i = 0; i < clsNumber; i++) {
+        //   console.log(clsNames[i] + "BB");
+        //   document.getElementById(clsNames[i] + "BB").classList.add("hidden");
+        // }
+        const oldBBoxes = document.getElementsByClassName("bounding-box");
+        while (oldBBoxes.length > 0) {
+          oldBBoxes[0].parentNode.removeChild(oldBBoxes[0]);
+        }
+        //var htmlBoundingBox = document.getElementById("vaseBB");
+        var bbColor = "DarkRed";
         let returnMessage = "";
         let leftMostPos = 100;
         let rightMostPos = 0;
@@ -246,19 +289,34 @@
           for (let i = 0; i < bboxes[0].length; i++) {
             returnMessage = alertMessage[1];
             //------------------Drawing the bounding box --------------------------
-            if (bboxes[0][i] == 0) {
-              htmlBoundingBox = document.getElementById("vaseBB");
-              bbColor = "red";
-              htmlBoundingBox.classList.remove("hidden");
-            } else if (bboxes[0][i] == 1) {
-              htmlBoundingBox = document.getElementById("bookBB");
-              bbColor = "green";
-              htmlBoundingBox.classList.remove("hidden");
-            } else if (bboxes[0][i] == 2) {
-              htmlBoundingBox = document.getElementById("shoesBB");
-              htmlBoundingBox.classList.remove("hidden");
-              bbColor = "blue";
-            }
+            // if (bboxes[0][i] == 0) {
+            //   htmlBoundingBox = document.getElementById("vaseBB");
+            //   bbColor = "red";
+            //   htmlBoundingBox.classList.remove("hidden");
+            // } else if (bboxes[0][i] == 1) {
+            //   htmlBoundingBox = document.getElementById("bookBB");
+            //   bbColor = "green";
+            //   htmlBoundingBox.classList.remove("hidden");
+            // } else if (bboxes[0][i] == 2) {
+            //   htmlBoundingBox = document.getElementById("shoesBB");
+            //   htmlBoundingBox.classList.remove("hidden");
+            //   bbColor = "blue";
+            // }
+            // for (let j = 0; j < clsNumber; j ++){
+            //   if (bboxes[0][i] == j) {
+
+            //     break;
+            // }
+            const htmlBoundingBox = document.createElement("div");
+            htmlBoundingBox.className = "bounding-box";
+            document
+              .getElementById("image-container")
+              .appendChild(htmlBoundingBox);
+            // htmlBoundingBox = document.getElementById(
+            //   clsNames[bboxes[0][i]] + "BB"
+            // );
+            bbColor = bbColors[bboxes[0][i]];
+            //htmlBoundingBox.classList.remove("hidden");
             htmlBoundingBox.style.left = `${
               bboxes[2][i][0] - bboxes[2][i][2] / 2
             }%`;

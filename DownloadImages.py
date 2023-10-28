@@ -26,7 +26,7 @@ servoAngle = "135"
 leftSpeed = "255"
 rightSpeed = "255"
 
-model = YOLO('./runs/detect/train5/weights/best.pt')
+model = YOLO('./runs/detect/train12/weights/best.pt')
 
 @app.route('/')
 def index():
