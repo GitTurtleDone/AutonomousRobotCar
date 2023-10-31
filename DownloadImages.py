@@ -22,15 +22,15 @@ dirContents = os.listdir(saveFolderPath)
 files = [item for item in dirContents if os.path.isfile(os.path.join(saveFolderPath, item))]
 # set the image_counter by counting all the files in the folder to be saved to
 imageCounter = len(files) + 1
-servoAngle = "135"
-leftSpeed = "255"
-rightSpeed = "255"
+servoPos = "115"
+leftSpeed = "195"
+rightSpeed = "205"
 
 model = YOLO('./runs/detect/train12/weights/best.pt')
 
 @app.route('/')
 def index():
-    return render_template('index.html', counter=imageCounter, servoAngle = servoAngle, leftSpeed = leftSpeed, rightSpeed = rightSpeed)
+    return render_template('index.html', counter=imageCounter, servoPos = servoPos, leftSpeed = leftSpeed, rightSpeed = rightSpeed)
     # the index .html file should be stored in a "template" folder of the project file
 
 @app.route('/favicon.ico')
@@ -44,7 +44,7 @@ def download_image():
     global imageCounter, saveFolderPath
     
     
-    image_url = "http://192.168.1.64/action?go=takePhoto"
+    image_url = "http://192.168.1.65/action?go=takePhoto"
     response = requests.get(image_url)
     img = Image.open(BytesIO(response.content))
     # Generate the filename using the counter
@@ -57,7 +57,7 @@ def download_image():
 @app.route('/predict', methods=['POST'])
 def predictImage():
     global model
-    image_url = "http://192.168.1.64/action?go=takePhoto"
+    image_url = "http://192.168.1.65/action?go=takePhoto"
     response = requests.get(image_url)
     img = Image.open(BytesIO(response.content))
 
@@ -73,18 +73,18 @@ def predictImage():
 
 
 
-@app.route('/getServoAngle', methods=['POST'])
-def get_servoAngle():
-    servoAngle_url = "http://192.168.1.64/action?go=servoAngle"
-    global servoAngle, image_counter
-    servoAngle = requests.get(servoAngle_url).text
+@app.route('/getServoPos', methods=['POST'])
+def get_servoPos():
+    servoPos_url = "http://192.168.1.65/action?go=servoPos"
+    global servoPos, image_counter
+    servoPos = requests.get(servoPos_url).text
   
     
 
-    return servoAngle
+    return servoPos
 @app.route('/getLeftSpeed', methods=['POST'])
 def get_leftSpeed():
-    leftSpeed_url = "http://192.168.1.64/action?go=leftSpeed"
+    leftSpeed_url = "http://192.168.1.65/action?go=leftSpeed"
     leftSpeed = requests.get(leftSpeed_url).text
   
     
@@ -92,11 +92,8 @@ def get_leftSpeed():
     return leftSpeed
 @app.route('/getRightSpeed', methods=['POST'])
 def get_rightSpeed():
-    rightSpeed_url = "http://192.168.1.64/action?go=rightSpeed"
+    rightSpeed_url = "http://192.168.1.65/action?go=rightSpeed"
     rightSpeed = requests.get(rightSpeed_url).text
-
-    
-
     return rightSpeed
 
 if __name__ == '__main__':

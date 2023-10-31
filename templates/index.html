@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -35,6 +36,14 @@
         -ms-user-select: none;
         user-select: none;
         -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+      }
+      .varInput {
+        background-color: #ffffff;
+        border: 2px solid #00aaff;
+        width: 50 px;
+        height: 20 px;
+        /* font-size: 15 px; */
+        color: #ff0000;
       }
       img {
         width: auto;
@@ -185,7 +194,7 @@
             onmouseup="toggleCheckbox('stop');"
             ontouchend="toggleCheckbox('stop');"
           >
-            Veer Right
+            Rerverse Right
           </button>
         </td>
       </tr>
@@ -197,34 +206,44 @@
         </td>
       </tr>
       <tr>
-        <td colspan="3" align="center">
-          <button class="button" id="btnLeftSpeedDecrease">
-            Decrease Left Speed
-          </button>
-          <input type="text" id="iptLeftSpeed" value="{{leftSpeed}}" />
-          <button class="button" id="btnLeftSpeedIncrease">
-            Increase Left Speed
-          </button>
+        <td colspan="4" align="center">
+          <label> Left Speed: Min 185 Max 255</label>
+          <button class="button" id="btnLeftSpeedDecrease">-</button>
+          <input
+            class="varInput"
+            type="text"
+            id="iptLeftSpeed"
+            value="{{leftSpeed}}"
+          />
+          <button class="button" id="btnLeftSpeedIncrease">+</button>
         </td>
       </tr>
 
       <tr>
-        <td colspan="3" align="center">
-          <button class="button" id="btnRightSpeedDecrease">
-            Decrease Right Speed
-          </button>
-          <input type="text" id="iptRightSpeed" value="{{rightSpeed}}" />
-          <button class="button" id="btnRightSpeedIncrease">
-            Increase Right Speed
-          </button>
+        <td colspan="4" align="center">
+          <label> Right Speed: Min 185 Max 255</label>
+          <button class="button" id="btnRightSpeedDecrease">-</button>
+          <input
+            class="varInput"
+            type="text"
+            id="iptRightSpeed"
+            value="{{rightSpeed}}"
+          />
+          <button class="button" id="btnRightSpeedIncrease">+</button>
         </td>
       </tr>
 
       <tr>
-        <td colspan="3" align="center">
-          <button class="button" id="btnServoLeft">Servo Left</button>
-          <input type="text" id="iptServoAngle" value="{{servoAngle}}" />
-          <button class="button" id="btnServoRight">Servo Right</button>
+        <td colspan="4" align="center">
+          <label> Servo Pos: L(+) Max 155 R(-) Min 95</label>
+          <button class="button" id="btnServoLeft">+</button>
+          <input
+            class="varInput"
+            type="text"
+            id="iptServoPos"
+            value="{{servoPos}}"
+          />
+          <button class="button" id="btnServoRight">-</button>
         </td>
       </tr>
     </table>
@@ -232,10 +251,37 @@
     <script>
       function toggleCheckbox(x) {
         var xhr = new XMLHttpRequest();
-        xhr.open("GET", "http://192.168.1.64/action?go=" + x, true);
+        xhr.open("GET", "http://192.168.1.65/action?go=" + x, true);
         xhr.send();
-        if (!streamPredictionEnable) setTimeout(predictOnce, 100);
+        //if (!streamPredictionEnable) setTimeout(predictOnce, 100);
+        if (!streamPredictionEnable) predictOnce();
       }
+
+      function toggleSetValue(x, y) {
+        var xhr = new XMLHttpRequest();
+        xhr.open(
+          "POST",
+          "http://192.168.1.65/set?name=" + x + "&value=" + y,
+          true
+        );
+        xhr.send();
+        //if (!streamPredictionEnable) setTimeout(predictOnce, 100);
+      }
+
+      function changeInput(strESP32EndPoint, strFlaskEndPoint, strIptID) {
+        const inputLeftSpeed = document.getElementById(strIptID);
+        inputLeftSpeed.addEventListener("change", function () {
+          let inputValue = inputLeftSpeed.value;
+          console.log(inputValue);
+          toggleSetValue(strESP32EndPoint, inputValue);
+          updateInput(strFlaskEndPoint, strIptID);
+        });
+      }
+      changeInput("setLeftSpeed", "getLeftSpeed", "iptLeftSpeed");
+      changeInput("setRightSpeed", "getRightSpeed", "iptRightSpeed");
+      changeInput("setServoPos", "getServoPos", "iptServoPos");
+      // let speedStep = 10,
+      //   servoStep = 10;
       function requestESP32nFlask(
         strBtnID,
         strESP32EndPoint,
@@ -246,7 +292,7 @@
           .getElementById(strBtnID)
           .addEventListener("click", function () {
             toggleCheckbox(strESP32EndPoint);
-            // toggleCheckbox('servoAngle');
+            // toggleCheckbox('servoPos');
             var xhr = new XMLHttpRequest();
             xhr.open("POST", "/" + strFlaskEndPoint, true);
             xhr.setRequestHeader(
@@ -260,6 +306,63 @@
             };
             xhr.send();
           });
+      }
+
+      requestESP32nFlask(
+        "btnLeftSpeedDecrease",
+        "leftSpeedDecrease",
+        "getLeftSpeed",
+        "iptLeftSpeed"
+      );
+      requestESP32nFlask(
+        "btnLeftSpeedIncrease",
+        "leftSpeedIncrease",
+        "getLeftSpeed",
+        "iptLeftSpeed"
+      );
+      requestESP32nFlask(
+        "btnRightSpeedDecrease",
+        "rightSpeedDecrease",
+        "getRightSpeed",
+        "iptRightSpeed"
+      );
+      requestESP32nFlask(
+        "btnRightSpeedIncrease",
+        "rightSpeedIncrease",
+        "getRightSpeed",
+        "iptRightSpeed"
+      );
+      requestESP32nFlask(
+        "btnServoLeft",
+        "servoLeft",
+        "getServoPos",
+        "iptServoPos"
+      );
+      requestESP32nFlask(
+        "btnServoRight",
+        "servoRight",
+        "getServoPos",
+        "iptServoPos"
+      );
+
+      function updateInput(
+        //strBtnID,
+        //strESP32EndPoint,
+        strFlaskEndPoint,
+        strIptID
+      ) {
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", "/" + strFlaskEndPoint, true);
+        xhr.setRequestHeader(
+          "Content-Type",
+          "application/x-www-form-urlencoded"
+        );
+        xhr.onreadystatechange = function () {
+          if (xhr.readyState === 4 && xhr.status === 200) {
+            document.getElementById(strIptID).value = xhr.responseText;
+          }
+        };
+        xhr.send();
       }
       // Draw bounding boxes around detected objects on the image element upon receiving a response from yolo8
       const alertMessage = [
@@ -396,7 +499,7 @@
       }
       // Make a request to yolo8 to predict an image then draw bounding boxes around the detected objects
       let returnInfo = ["Stop", 0, 100, 100, 100];
-      function predictOnce() {
+      async function predictOnce() {
         var xhr = new XMLHttpRequest();
 
         xhr.open("POST", "/predict", true);
@@ -581,48 +684,12 @@
         loopIteration();
       }
 
-      requestESP32nFlask(
-        "btnLeftSpeedDecrease",
-        "leftSpeedDecrease",
-        "getLeftSpeed",
-        "iptLeftSpeed"
-      );
-      requestESP32nFlask(
-        "btnLeftSpeedIncrease",
-        "leftSpeedIncrease",
-        "getLeftSpeed",
-        "iptLeftSpeed"
-      );
-      requestESP32nFlask(
-        "btnRightSpeedDecrease",
-        "rightSpeedDecrease",
-        "getRightSpeed",
-        "iptRightSpeed"
-      );
-      requestESP32nFlask(
-        "btnRightSpeedIncrease",
-        "rightSpeedIncrease",
-        "getRightSpeed",
-        "iptRightSpeed"
-      );
-      requestESP32nFlask(
-        "btnServoLeft",
-        "servoLeft",
-        "getServoAngle",
-        "iptServoAngle"
-      );
-      requestESP32nFlask(
-        "btnServoRight",
-        "servoRight",
-        "getServoAngle",
-        "iptServoAngle"
-      );
-
       window.onload = async function () {
         const camImage = document.getElementById("photo");
-        //console.log(`Top: ${camImage.style.top}; Left: ${camImage.style.left}`);
-        camImage.src = "http://192.168.1.64:81/stream";
-
+        await updateInput("getLeftSpeed", "iptLeftSpeed");
+        await updateInput("getRightSpeed", "iptRightSpeed");
+        await updateInput("getServoPos", "iptServoPos");
+        camImage.src = "http://192.168.1.65:81/stream";
         await predictOnce();
       };
     </script>

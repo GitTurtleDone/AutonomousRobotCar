@@ -26,6 +26,8 @@ typedef struct {
 // Replace with your network credentials
 // const char* ssid = "your_ssid";
 // const char* password = "your_pass";
+const char* ssid = "SPARK-B315-DB3F";
+const char* password = "A2DJG680N80";
 
 #define PART_BOUNDARY "123456789000000000000987654321"
 
@@ -140,15 +142,20 @@ typedef struct {
 #define MOTOR_2_PIN_2    15
 
 #define servoPin 2
-int servoPos = 135;
+int servoPos = 115;
+int minServoPos = 75;
+int maxServoPos = 155; 
 int servoStep = 10;
+
 
 Servo servoN1;
 Servo servoN2;
 Servo myServo;
 
-int leftSpeed = 255;
-int rightSpeed = 255;
+int leftSpeed = 195;
+int rightSpeed = 205;
+int minSpeed = 185;
+int maxSpeed = 255;
 int speedStep = 10;
 
 static const char* _STREAM_CONTENT_TYPE = "multipart/x-mixed-replace;boundary=" PART_BOUNDARY;
@@ -350,7 +357,7 @@ static esp_err_t cmd_handler(httpd_req_t *req){
     analogWrite(MOTOR_2_PIN_1, rightSpeed);
     analogWrite(MOTOR_2_PIN_2, 0);
   }
-   else if(!strcmp(variable, "veerLeft")) {
+  else if(!strcmp(variable, "veerLeft")) {
     Serial.println("Veer Left");
     analogWrite(MOTOR_1_PIN_1, 0);
     analogWrite(MOTOR_1_PIN_2, 0);
@@ -480,13 +487,23 @@ static esp_err_t cmd_handler(httpd_req_t *req){
   }
 
   else if(!strcmp(variable, "leftSpeedIncrease")) {
-    Serial.println("Increse left speed");
-    leftSpeed += speedStep;
+    if ((leftSpeed + speedStep) > maxSpeed) {
+      Serial.println("Maximum speed has been reached");
+      leftSpeed = maxSpeed;
+    } else {
+      leftSpeed += speedStep;
+    };
+    Serial.println("Left speed increased");
   }
 
   else if(!strcmp(variable, "leftSpeedDecrease")) {
-    Serial.println("Decrese left speed");
-    leftSpeed -= speedStep;
+    if ((leftSpeed - speedStep) < minSpeed) {
+      Serial.println("Minimum speed has been reached");
+      leftSpeed = minSpeed;
+    } else {
+      leftSpeed -= speedStep;
+    };
+    Serial.println("Left speed decreased");
   }
 
   else if(!strcmp(variable, "leftSpeed")) {
@@ -498,13 +515,23 @@ static esp_err_t cmd_handler(httpd_req_t *req){
   }
   //-------------------------------------------
   else if(!strcmp(variable, "rightSpeedIncrease")) {
-    Serial.println("Increse right speed");
-    rightSpeed += speedStep;
+    if ((rightSpeed + speedStep) > maxSpeed) {
+      Serial.println("Maximum speed has been reached");
+      rightSpeed = maxSpeed;
+    } else {
+      rightSpeed += speedStep;
+    };
+    Serial.println("Right speed increased");
   }
 
   else if(!strcmp(variable, "rightSpeedDecrease")) {
-    Serial.println("Decrese right speed");
-    rightSpeed -= speedStep;
+    if ((rightSpeed - speedStep) < minSpeed) {
+      Serial.println("Minimum speed has been reached");
+      rightSpeed = minSpeed;
+    } else {
+      rightSpeed -= speedStep;
+    };
+    Serial.println("Right speed decreased");
   }
 
   else if(!strcmp(variable, "rightSpeed")) {
@@ -519,18 +546,29 @@ static esp_err_t cmd_handler(httpd_req_t *req){
 
   else if(!strcmp(variable, "servoLeft")) {
     Serial.println("Servo Left");
-    servoPos += servoStep;
+    if ((servoPos + servoStep) > maxServoPos) {
+      Serial.println("Servo left limit has been reached");
+      servoPos = maxServoPos;
+    } else {
+      servoPos += servoStep;
+    };
     myServo.write(servoPos);
   }
 
   else if(!strcmp(variable, "servoRight")) {
     Serial.println("Servo Right");
-    servoPos -= servoStep;
+    if ((servoPos - servoStep) < minServoPos) {
+      Serial.println("Servo right limit has been reached");
+      servoPos = minServoPos;
+    } else {
+      servoPos -= servoStep;
+    };
+    
     myServo.write(servoPos);
   }
 
-  else if(!strcmp(variable, "servoAngle")) {
-    Serial.println("Get Servo Angle");
+  else if(!strcmp(variable, "servoPos")) {
+    Serial.println("Get Servo Position");
     char servoPosStr[3];
     sprintf(servoPosStr, "%d", servoPos);
     httpd_resp_send(req, servoPosStr, HTTPD_RESP_USE_STRLEN);
@@ -544,6 +582,118 @@ static esp_err_t cmd_handler(httpd_req_t *req){
     res = -1;
   }
 
+  if(res){
+    return httpd_resp_send_500(req);
+  }
+
+  httpd_resp_set_hdr(req, "Access-Control-Allow-Origin", "*");
+  return httpd_resp_send(req, NULL, 0);
+}
+
+
+static esp_err_t set_handler(httpd_req_t *req){
+  char*  buf;
+  size_t buf_len;
+  char var_name[32] = {0,};
+  char var_value[4] = {0,};
+  //esp_err_t res = httpd_req_recv(req, &buf, HTTPD_REQ_DATA, 0);
+ 
+  //int value;
+  // if (res == ESP_OK) {
+  //     buf_len = httpd_req_get_url_query_len(req) + 1;
+  //     if (buf_len > 1) {
+  //         if (httpd_query_key_value(buf, "value", buf, buf_len) == ESP_OK) {
+  //             value = atoi(buf);
+  //             variableToUpdate = value;
+  //             httpd_resp_send(req, "Variable updated", -1);
+  //             return ESP_OK;
+  //         }
+  //     }
+  // }
+
+  // httpd_resp_send_404(req);
+  // return ESP_FAIL;
+  
+  buf_len = httpd_req_get_url_query_len(req) + 1;
+  if (buf_len > 1) {
+    buf = (char*)malloc(buf_len);
+    if(!buf){
+      httpd_resp_send_500(req);
+      return ESP_FAIL;
+    }
+    if (httpd_req_get_url_query_str(req, buf, buf_len) == ESP_OK) {
+      // Serial.print("buf: ");
+      // Serial.println(buf);
+      if (httpd_query_key_value(buf, "name", var_name, sizeof(var_name)) == ESP_OK) {
+        // Serial.print("var_name: ");
+        // Serial.println(var_name);
+        
+        if (httpd_query_key_value(buf, "value", var_value, sizeof(var_value)) == ESP_OK){
+          // Serial.println(var_value);
+        }
+      } else {
+        free(buf);
+        httpd_resp_send_404(req);
+        return ESP_FAIL;
+      }
+    } else {
+      free(buf);
+      httpd_resp_send_404(req);
+      return ESP_FAIL;
+    }
+    free(buf);
+  } else {
+    httpd_resp_send_404(req);
+    return ESP_FAIL;
+  }
+
+  //sensor_t * s = esp_camera_sensor_get();
+  int res = 0;
+  
+  if(!strcmp(var_name, "setLeftSpeed")) {
+    int speedValue =  atoi(var_value);;
+    if (speedValue > maxSpeed){
+      leftSpeed = maxSpeed;
+      Serial.println("Max speed has been reached");
+    } else if (speedValue < minSpeed){
+      leftSpeed = minSpeed;
+      Serial.println("Min speed has been reached");
+    } else {
+      leftSpeed = speedValue;
+    }; 
+    Serial.println("Left Speed Set");
+    
+  }
+  else if(!strcmp(var_name, "setRightSpeed")) {
+    int speedValue =  atoi(var_value);;
+    if (speedValue > maxSpeed){
+      rightSpeed = maxSpeed;
+      Serial.println("Max speed has been reached");
+    } else if (speedValue < minSpeed){
+      rightSpeed = minSpeed;
+      Serial.println("Min speed has been reached");
+    } else {
+      rightSpeed = speedValue;
+    };
+    Serial.println("Right Speed Set");  
+  }
+  else if(!strcmp(var_name, "setServoPos")) {
+    int servoValue =  atoi(var_value);
+    if (servoValue > maxServoPos){
+      servoPos = maxServoPos;
+      Serial.println("Left servo limit has been reached");
+    } else if (servoValue < minServoPos){
+      servoPos = minServoPos;
+      Serial.println("Right servo limit has been reached");
+    } else {
+      servoPos = servoValue;
+    }
+    myServo.write(servoPos);
+    Serial.println("Servo Position Set");
+  }
+  else {
+    res = -1;
+  }
   if(res){
     return httpd_resp_send_500(req);
   }
@@ -570,12 +720,12 @@ void startCameraServer(){
     .handler   = cmd_handler,
     .user_ctx  = NULL
   };
-  // httpd_uri_t value_uri = {
-  //   .uri       = "/value",
-  //   .method    = HTTP_GET,
-  //   .handler   = value_handler,
-  //   .user_ctx  = NULL
-  // };
+  httpd_uri_t set_uri = {
+    .uri       = "/set",
+    .method    = HTTP_POST,
+    .handler   = set_handler,
+    .user_ctx  = NULL
+  };
   httpd_uri_t stream_uri = {
     .uri       = "/stream",
     .method    = HTTP_GET,
@@ -585,7 +735,7 @@ void startCameraServer(){
   if (httpd_start(&camera_httpd, &config) == ESP_OK) {
     httpd_register_uri_handler(camera_httpd, &index_uri);
     httpd_register_uri_handler(camera_httpd, &cmd_uri);
-    // httpd_register_uri_handler(camera_httpd, &value_uri);
+    httpd_register_uri_handler(camera_httpd, &set_uri);
   }
   config.server_port += 1;
   config.ctrl_port += 1;
@@ -678,6 +828,9 @@ static size_t jpg_encode_stream(void * arg, size_t index, const void* data, size
     return len;
 }
 
+
 void loop() {
+  // Serial.println(leftSpeed);
+  // delay(1000);
   
 }
