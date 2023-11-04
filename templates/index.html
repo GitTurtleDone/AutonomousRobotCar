@@ -11,23 +11,44 @@
         margin: 0px auto;
         padding-top: 30px;
       }
-      table {
-        margin-left: auto;
-        margin-right: auto;
-      }
-      td {
-        padding: 8 px;
+
+      .variable-label {
+        display: flex;
+        align-items: center;
+        text-align: left;
+        margin: 0;
+        color: #2640c3;
+        font-size: 18px;
       }
       .button {
         background-color: #2f4468;
         border: none;
         color: white;
+        text-align: center;
+        text-decoration: none;
+        display: flex;
+        font-size: 18px;
         padding: 10px 20px;
+        margin: 0 10px;
+        cursor: pointer;
+        justify-content: center;
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        -khtml-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+        -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+      }
+      .go-button {
+        background-color: #26a1c3;
+        border: solid 1px #000000;
+        color: #ffffff;
         text-align: center;
         text-decoration: none;
         display: inline-block;
         font-size: 18px;
-        margin: 6px 3px;
+        padding: 6px 4px;
         cursor: pointer;
         -webkit-touch-callout: none;
         -webkit-user-select: none;
@@ -38,12 +59,16 @@
         -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
       }
       .varInput {
+        display: flex;
         background-color: #ffffff;
-        border: 2px solid #00aaff;
-        width: 50 px;
-        height: 20 px;
+        /* border: 2px solid #00aaff; */
+        /* width: 50 px;
+        height: 20 px; */
         /* font-size: 15 px; */
         color: #ff0000;
+        padding: 0 3px;
+        margin: 0 3px;
+        justify-content: center;
       }
       img {
         width: auto;
@@ -64,9 +89,34 @@
       .hidden {
         display: none;
       }
+      .go-button-container {
+        display: grid;
+        margin: 50px 20px;
+        justify-content: center;
+        gap: 0;
+
+        /* Define grid templates for each row */
+        grid-template-columns: 150px 150px 150px;
+      }
+      .process-button-container {
+        display: grid;
+        gap: 10px 5px;
+        margin: 50px 20px;
+        justify-content: center;
+
+        /* Define grid templates for each row */
+        grid-template-columns: 250px 250px 250px;
+      }
+      .variable-container {
+        display: grid;
+        gap: 10px 10px;
+        margin: 50px auto;
+        justify-content: center;
+
+        /* Define grid templates for each row */
+        grid-template-columns: 300px 50px 50px 50px;
+      }
     </style>
-    <!-- <link rel="stylesheet" href="https://pyscript.net/alpha/pyscript.css" />
-    <script defer src="https://pyscript.net/alpha/pyscript.js"></script> -->
   </head>
   <body>
     <h1>Autonomous Robot Car</h1>
@@ -74,179 +124,128 @@
     <div id="image-container">
       <img src="" id="photo" />
     </div>
+    <div class="go-button-container">
+      <button
+        class="go-button"
+        onmousedown="toggleCheckbox('veerLeft');"
+        ontouchstart="toggleCheckbox('veerLeft');"
+        onmouseup="toggleCheckbox('stop');"
+        ontouchend="toggleCheckbox('stop');"
+      >
+        Veer Left
+      </button>
+      <button
+        class="go-button"
+        onmousedown="toggleCheckbox('forward');"
+        ontouchstart="toggleCheckbox('forward');"
+        onmouseup="toggleCheckbox('stop');"
+        ontouchend="toggleCheckbox('stop');"
+      >
+        Forward
+      </button>
 
-    <table>
-      <tr>
-        <td colspan="3" align="center">
-          <button class="button" id="btnPredict">Predict Once</button>
-          <button class="button" id="btnStreamPrediction">
-            Stream Prediction
-          </button>
-          <button class="button" id="btnStopStreamPrediction">
-            Stop Stream Prediction
-          </button>
-        </td>
-      </tr>
-      <tr>
-        <td colspan="2" align="center">
-          <button class="button" id="btnRunAuto">Run autonomously</button>
-          <button class="button" id="btnStopRunAuto">
-            Stop run autonomously
-          </button>
-        </td>
-      </tr>
-      <tr>
-        <td align="center">
-          <button
-            class="button"
-            onmousedown="toggleCheckbox('veerLeft');"
-            ontouchstart="toggleCheckbox('veerLeft');"
-            onmouseup="toggleCheckbox('stop');"
-            ontouchend="toggleCheckbox('stop');"
-          >
-            Veer Left
-          </button>
-        </td>
-        <td colspan="3" align="center">
-          <button
-            class="button"
-            onmousedown="toggleCheckbox('forward');"
-            ontouchstart="toggleCheckbox('forward');"
-            onmouseup="toggleCheckbox('stop');"
-            ontouchend="toggleCheckbox('stop');"
-          >
-            Forward
-          </button>
-        </td>
-        <td align="center">
-          <button
-            class="button"
-            onmousedown="toggleCheckbox('veerRight');"
-            ontouchstart="toggleCheckbox('veerRight');"
-            onmouseup="toggleCheckbox('stop');"
-            ontouchend="toggleCheckbox('stop');"
-          >
-            Veer Right
-          </button>
-        </td>
-      </tr>
-      <tr>
-        <td align="center">
-          <button
-            class="button"
-            onmousedown="toggleCheckbox('left');"
-            ontouchstart="toggleCheckbox('left');"
-            onmouseup="toggleCheckbox('stop');"
-            ontouchend="toggleCheckbox('stop');"
-          >
-            Left
-          </button>
-        </td>
-        <td align="center">
-          <button
-            class="button"
-            onmousedown="toggleCheckbox('stop');"
-            ontouchstart="toggleCheckbox('stop');"
-          >
-            Stop
-          </button>
-        </td>
-        <td align="center">
-          <button
-            class="button"
-            onmousedown="toggleCheckbox('right');"
-            ontouchstart="toggleCheckbox('right');"
-            onmouseup="toggleCheckbox('stop');"
-            ontouchend="toggleCheckbox('stop');"
-          >
-            Right
-          </button>
-        </td>
-      </tr>
-      <tr>
-        <td align="center">
-          <button
-            class="button"
-            onmousedown="toggleCheckbox('reverseLeft');"
-            ontouchstart="toggleCheckbox('reverseLeft');"
-            onmouseup="toggleCheckbox('stop');"
-            ontouchend="toggleCheckbox('stop');"
-          >
-            Reverse Left
-          </button>
-        </td>
-        <td colspan="3" align="center">
-          <button
-            class="button"
-            onmousedown="toggleCheckbox('backward');"
-            ontouchstart="toggleCheckbox('backward');"
-            onmouseup="toggleCheckbox('stop');"
-            ontouchend="toggleCheckbox('stop');"
-          >
-            Backward
-          </button>
-        </td>
-        <td align="center">
-          <button
-            class="button"
-            onmousedown="toggleCheckbox('reverseRight');"
-            ontouchstart="toggleCheckbox('reverseRight');"
-            onmouseup="toggleCheckbox('stop');"
-            ontouchend="toggleCheckbox('stop');"
-          >
-            Rerverse Right
-          </button>
-        </td>
-      </tr>
-      <tr>
-        <td colspan="3" align="center">
-          <button class="button" id="btnTakePhoto">
-            Take and Save a Photo
-          </button>
-        </td>
-      </tr>
-      <tr>
-        <td colspan="4" align="center">
-          <label> Left Speed: Min 185 Max 255</label>
-          <button class="button" id="btnLeftSpeedDecrease">-</button>
-          <input
-            class="varInput"
-            type="text"
-            id="iptLeftSpeed"
-            value="{{leftSpeed}}"
-          />
-          <button class="button" id="btnLeftSpeedIncrease">+</button>
-        </td>
-      </tr>
+      <button
+        class="go-button"
+        onmousedown="toggleCheckbox('veerRight');"
+        ontouchstart="toggleCheckbox('veerRight');"
+        onmouseup="toggleCheckbox('stop');"
+        ontouchend="toggleCheckbox('stop');"
+      >
+        Veer Right
+      </button>
+      <button
+        class="go-button"
+        onmousedown="toggleCheckbox('left');"
+        ontouchstart="toggleCheckbox('left');"
+        onmouseup="toggleCheckbox('stop');"
+        ontouchend="toggleCheckbox('stop');"
+      >
+        Left
+      </button>
+      <button
+        class="go-button"
+        onmousedown="toggleCheckbox('stop');"
+        ontouchstart="toggleCheckbox('stop');"
+      >
+        Stop
+      </button>
+      <button
+        class="go-button"
+        onmousedown="toggleCheckbox('right');"
+        ontouchstart="toggleCheckbox('right');"
+        onmouseup="toggleCheckbox('stop');"
+        ontouchend="toggleCheckbox('stop');"
+      >
+        Right
+      </button>
 
-      <tr>
-        <td colspan="4" align="center">
-          <label> Right Speed: Min 185 Max 255</label>
-          <button class="button" id="btnRightSpeedDecrease">-</button>
-          <input
-            class="varInput"
-            type="text"
-            id="iptRightSpeed"
-            value="{{rightSpeed}}"
-          />
-          <button class="button" id="btnRightSpeedIncrease">+</button>
-        </td>
-      </tr>
-
-      <tr>
-        <td colspan="4" align="center">
-          <label> Servo Pos: L(+) Max 155 R(-) Min 95</label>
-          <button class="button" id="btnServoLeft">+</button>
-          <input
-            class="varInput"
-            type="text"
-            id="iptServoPos"
-            value="{{servoPos}}"
-          />
-          <button class="button" id="btnServoRight">-</button>
-        </td>
-      </tr>
-    </table>
+      <button
+        class="go-button"
+        onmousedown="toggleCheckbox('reverseLeft');"
+        ontouchstart="toggleCheckbox('reverseLeft');"
+        onmouseup="toggleCheckbox('stop');"
+        ontouchend="toggleCheckbox('stop');"
+      >
+        Reverse Left
+      </button>
+      <button
+        class="go-button"
+        onmousedown="toggleCheckbox('backward');"
+        ontouchstart="toggleCheckbox('backward');"
+        onmouseup="toggleCheckbox('stop');"
+        ontouchend="toggleCheckbox('stop');"
+      >
+        Backward
+      </button>
+      <button
+        class="go-button"
+        onmousedown="toggleCheckbox('reverseRight');"
+        ontouchstart="toggleCheckbox('reverseRight');"
+        onmouseup="toggleCheckbox('stop');"
+        ontouchend="toggleCheckbox('stop');"
+      >
+        Rerverse Right
+      </button>
+    </div>
+    <div class="process-button-container">
+      <button class="button" id="btnPredict">Predict Once</button>
+      <button class="button" id="btnStreamPrediction">Stream Prediction</button>
+      <button class="button" id="btnStopStreamPrediction">
+        Stop Stream Prediction
+      </button>
+      <button class="button" id="btnTakePhoto">Take & Save a Photo</button>
+      <button class="button" id="btnRunAuto">Run Auto</button>
+      <button class="button" id="btnStopRunAuto">Stop Running Auto</button>
+    </div>
+    <div class="variable-container">
+      <label class="variable-label"> Left Speed: Min 195 Max 255</label>
+      <button class="button" id="btnLeftSpeedDecrease">-</button>
+      <input
+        class="varInput"
+        type="text"
+        id="iptLeftSpeed"
+        value="{{leftSpeed}}"
+      />
+      <button class="button" id="btnLeftSpeedIncrease">+</button>
+      <label class="variable-label"> Right Speed: Min 195 Max 255</label>
+      <button class="button" id="btnRightSpeedDecrease">-</button>
+      <input
+        class="varInput"
+        type="text"
+        id="iptRightSpeed"
+        value="{{rightSpeed}}"
+      />
+      <button class="button" id="btnRightSpeedIncrease">+</button>
+      <label class="variable-label"> Servo Pos: L(+) Max 155 R(-) Min 95</label>
+      <button class="button" id="btnServoLeft">+</button>
+      <input
+        class="varInput"
+        type="text"
+        id="iptServoPos"
+        value="{{servoPos}}"
+      />
+      <button class="button" id="btnServoRight">-</button>
+    </div>
 
     <script>
       function toggleCheckbox(x, enablePredict = true) {
