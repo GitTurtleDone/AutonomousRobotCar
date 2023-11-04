@@ -249,12 +249,12 @@
     </table>
 
     <script>
-      function toggleCheckbox(x) {
+      function toggleCheckbox(x, enablePredict = true) {
         var xhr = new XMLHttpRequest();
         xhr.open("GET", "http://192.168.1.65/action?go=" + x, true);
         xhr.send();
         //if (!streamPredictionEnable) setTimeout(predictOnce, 100);
-        if (!streamPredictionEnable) predictOnce();
+        if (enablePredict) setTimeout(predictOnce, 50);
       }
 
       function toggleSetValue(x, y) {
@@ -269,9 +269,9 @@
       }
 
       function changeInput(strESP32EndPoint, strFlaskEndPoint, strIptID) {
-        const inputLeftSpeed = document.getElementById(strIptID);
-        inputLeftSpeed.addEventListener("change", function () {
-          let inputValue = inputLeftSpeed.value;
+        const inputField = document.getElementById(strIptID);
+        inputField.addEventListener("change", function () {
+          let inputValue = inputField.value;
           console.log(inputValue);
           toggleSetValue(strESP32EndPoint, inputValue);
           updateInput(strFlaskEndPoint, strIptID);
@@ -286,13 +286,13 @@
         strBtnID,
         strESP32EndPoint,
         strFlaskEndPoint,
-        strIptID
+        strIptID,
+        enablePredict = false
       ) {
         document
           .getElementById(strBtnID)
           .addEventListener("click", function () {
-            toggleCheckbox(strESP32EndPoint);
-            // toggleCheckbox('servoPos');
+            toggleCheckbox(strESP32EndPoint, enablePredict);
             var xhr = new XMLHttpRequest();
             xhr.open("POST", "/" + strFlaskEndPoint, true);
             xhr.setRequestHeader(
@@ -312,37 +312,43 @@
         "btnLeftSpeedDecrease",
         "leftSpeedDecrease",
         "getLeftSpeed",
-        "iptLeftSpeed"
+        "iptLeftSpeed",
+        false
       );
       requestESP32nFlask(
         "btnLeftSpeedIncrease",
         "leftSpeedIncrease",
         "getLeftSpeed",
-        "iptLeftSpeed"
+        "iptLeftSpeed",
+        false
       );
       requestESP32nFlask(
         "btnRightSpeedDecrease",
         "rightSpeedDecrease",
         "getRightSpeed",
-        "iptRightSpeed"
+        "iptRightSpeed",
+        false
       );
       requestESP32nFlask(
         "btnRightSpeedIncrease",
         "rightSpeedIncrease",
         "getRightSpeed",
-        "iptRightSpeed"
+        "iptRightSpeed",
+        false
       );
       requestESP32nFlask(
         "btnServoLeft",
         "servoLeft",
         "getServoPos",
-        "iptServoPos"
+        "iptServoPos",
+        true
       );
       requestESP32nFlask(
         "btnServoRight",
         "servoRight",
         "getServoPos",
-        "iptServoPos"
+        "iptServoPos",
+        true
       );
 
       function updateInput(
@@ -366,11 +372,18 @@
       }
       // Draw bounding boxes around detected objects on the image element upon receiving a response from yolo8
       const alertMessage = [
-        "No object detected",
-        "Object detected",
-        "Closing",
         "Stop",
+        "Decelerate",
+        "Accelerate",
+        "Veer Left",
+        "Veer Right",
+        "Decelarate and Veer Left",
+        "Decelarate and Veer Left",
+        "Reverse Left",
+        "Reverse Right",
+        "Backward",
       ];
+
       const clsNames = [
         "empty",
         "vase",
@@ -400,8 +413,13 @@
         "LightSkyBlue",
         "purple",
       ];
+      let conStopNum = 0;
+      let closingLimit = 60;
+      let stopLimit = 90;
+      let clearSideLimit = 10;
+      let ableToMoveWidth = 60;
       const clsNumber = clsNames.length; // get the class numbers
-      function drawBB(bboxes) {
+      function processBB(bboxes) {
         // for (let i = 0; i < clsNumber; i++) {
         //   console.log(clsNames[i] + "BB");
         //   document.getElementById(clsNames[i] + "BB").classList.add("hidden");
@@ -412,17 +430,16 @@
         }
         //var htmlBoundingBox = document.getElementById("vaseBB");
         var bbColor = "DarkRed";
-        let returnMessage = "";
+        let returnMessage = alertMessage[0];
         let leftMostPos = 100;
         let rightMostPos = 0;
         let bottomMostPos = 0;
         let maxWidth = 0;
-        let closingLimit = 60;
-        let stopLimit = 90;
+
+        let maxEmptyBBox = [0, 0, 0, 0];
 
         if (bboxes[0].length > 0) {
           for (let i = 0; i < bboxes[0].length; i++) {
-            returnMessage = alertMessage[1];
             //------------------Drawing the bounding box --------------------------
             // if (bboxes[0][i] == 0) {
             //   htmlBoundingBox = document.getElementById("vaseBB");
@@ -478,17 +495,47 @@
                 rightMostPos < bboxes[2][i][0] + bboxes[2][i][2] / 2
                   ? bboxes[2][i][0] + bboxes[2][i][2] / 2
                   : rightMostPos;
+            } else {
+              maxEmptyBBox =
+                bboxes[2][i][2] * bboxes[2][i][3] >
+                maxEmptyBBox[2] * maxEmptyBBox[3]
+                  ? bboxes[2][i]
+                  : maxEmptyBBox;
             }
           }
-        } else {
-          returnMessage = alertMessage[0];
         }
-        if (returnMessage != alertMessage[0]) {
-          if (bottomMostPos > closingLimit) {
+
+        if (maxEmptyBBox[3] >= 100 - closingLimit) {
+          if (maxEmptyBBox[2] >= 100 - clearSideLimit) {
+            returnMessage = alertMessage[2];
+          } else {
+            if (maxEmptyBBox[2] >= ableToMoveWidth)
+              returnMessage =
+                maxEmptyBBox[0] >= 50 ? alertMessage[4] : alertMessage[3];
+          }
+        } else if (
+          maxEmptyBBox[3] < 100 - closingLimit &&
+          maxEmptyBBox[3] >= 100 - stopLimit
+        ) {
+          if (maxEmptyBBox[2] >= 100 - clearSideLimit) {
+            returnMessage = alertMessage[1];
+          } else {
+            if (maxEmptyBBox[2] >= ableToMoveWidth)
+              returnMessage =
+                maxEmptyBBox[0] >= 50 ? alertMessage[6] : alertMessage[5];
+          }
+        } else {
+          if (maxEmptyBBox[2] >= ableToMoveWidth) {
             returnMessage =
-              bottomMostPos > stopLimit ? alertMessage[3] : alertMessage[2];
+              maxEmptyBBox[0] >= 50 ? alertMessage[7] : alertMessage[8];
+          } else {
+            conStopNum++;
+            if (conStopNum > 3) {
+              returnMessage = alertMessage[9];
+            }
           }
         }
+
         return [
           returnMessage,
           leftMostPos,
@@ -511,7 +558,7 @@
           if (xhr.readyState === 4 && xhr.status === 200) {
             //console.log(xhr.response);
             bboxes = JSON.parse(xhr.response);
-            returnInfo = drawBB(bboxes);
+            returnInfo = processBB(bboxes);
             console.log(`predicted Once: ${returnInfo}`);
           }
         };
@@ -600,81 +647,80 @@
         });
 
       function runAuto() {
-        const timeInterval = 200;
+        const timeInterval = 250;
         function loopIteration() {
           if (runAutoEnable) {
+            toggleSetValue("setServoPos", 120);
+            updateInput("getServoPos", "inpServoPos");
             predictOnce();
             console.log(`returnInfo: ${returnInfo}`);
             switch (returnInfo[0]) {
               case alertMessage[0]:
-                console.log("Auto: No object");
-                toggleCheckbox("forward");
+                console.log("Auto: Stop");
+                toggleCheckbox("stop", false);
+                toggleSetValue("setServoPos", 150);
+
+                predictOnce();
+                if (returnInfo[0] === alertMessage[0]) {
+                  toggleSetValue("setServoPos", 90);
+                  predictOnce();
+                  if (returnInfo[0] != alertMessage[0]) {
+                    toggleCheckbox("right", false);
+                    //toggleCheckbox("stop", false);
+                  }
+                } else {
+                  toggleCheckbox("left", false);
+                  //toggleCheckbox("stop", false);
+                }
+
                 break;
               case alertMessage[1]:
-                console.log("Auto: Object detected");
+                console.log("Auto: Decelerate");
+                document.getElementById("btnLeftSpeedDecrease").click();
+                document.getElementById("btnRightSpeedDecrease").click();
                 toggleCheckbox("forward");
                 break;
               case alertMessage[2]:
-                console.log("Auto: Closing");
-                requestESP32nFlask(
-                  "btnLeftSpeedDecrease",
-                  "leftSpeedDecrease",
-                  "getLeftSpeed",
-                  "iptLeftSpeed"
-                );
-                requestESP32nFlask(
-                  "btnRightSpeedDecrease",
-                  "rightSpeedDecrease",
-                  "getRightSpeed",
-                  "iptRightSpeed"
-                );
+                console.log("Auto: Accelerate");
+                document.getElementById("btnLeftSpeedIncrease").click();
+                document.getElementById("btnRightSpeedIncrease").click();
                 toggleCheckbox("forward");
                 break;
               case alertMessage[3]:
-                console.log("Auto: Stop");
-                // function assertStop() {
-                //   if (runAutoEnable == true) {
-                //     runAutoEnable = false;
-                //     toggleCheckbox("stop");
-                //   } else {
-                //     if (j < 100) {
-                //       setTimeout(assertStop, 10);
-                //       j++;
-                //     }
-                //   }
-                // }
-                // let j = 0;
-                // assertStop();
-                toggleCheckbox("backward");
-                toggleCheckbox("stop");
-                toggleCheckbox("backward");
-                toggleCheckbox("stop");
+                console.log("Auto: Veer Left");
                 toggleCheckbox("veerLeft");
-                toggleCheckbox("stop");
-                // function assertContinue() {
-                //   if (runAutoEnable == false) {
-                //     runAutoEnable = true;
-                //   } else {
-                //     if (k < 100) {
-                //       setTimeout(assertContinue, 10);
-                //       k++;
-                //     }
-                //   }
-                // }
-                // let k = 0;
+                break;
+              case alertMessage[4]:
+                console.log("Auto: Veer Right");
+                toggleCheckbox("veerRight");
+                break;
+              case alertMessage[5]:
+                console.log("Auto: Decelerate and Veer Left");
+                document.getElementById("btnLeftSpeedDecrease").click();
+                document.getElementById("btnRightSpeedDecrease").click();
+                toggleCheckbox("veerLeft");
+                break;
+              case alertMessage[6]:
+                console.log("Auto: Decelerate and Veer Right");
+                document.getElementById("btnLeftSpeedDecrease").click();
+                document.getElementById("btnRightSpeedDecrease").click();
+                toggleCheckbox("veerRight");
+                break;
+              case alertMessage[7]:
+                console.log("Auto: Reverse Left");
+                toggleCheckbox("reverseLeft", false);
 
-                if (returnInfo[0] == alertMessage[3]) {
-                  //   assertContinue();
-                  // } else {
-                  toggleCheckbox("backward");
-                  toggleCheckbox("stop");
-                  toggleCheckbox("veerRight");
-                  toggleCheckbox("stop");
-                  // k = 0;
-                  // if (returnInfo[0] != alertMessage[3]) {
-                  //   assertContinue();
-                  //}
-                }
+                break;
+              case alertMessage[8]:
+                console.log("Auto: ReverseRight");
+                toggleCheckbox("reverseRight", false);
+
+                break;
+              case alertMessage[9]:
+                console.log("Auto: Backward");
+                toggleCheckbox("backward", false);
+                toggleCheckbox("stop", false);
+                conStopNum = 0;
 
                 break;
             }
