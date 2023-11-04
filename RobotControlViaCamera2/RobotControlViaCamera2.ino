@@ -1,9 +1,18 @@
 /*********
-  Rui Santos
-  Complete instructions at https://RandomNerdTutorials.com/esp32-cam-projects-ebook/
   
-  Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files.
+  I started using Rui Santos's 
+  Complete instructions at: https://randomnerdtutorials.com/esp32-cam-car-robot-web-server/
+  and his book at https://RandomNerdTutorials.com/esp32-cam-projects-ebook/
+  His permission:
+  "Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files.
   The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+  "
+  By learning his codes and with the helpf of chatGPT I have added numerous functioning to the robot car
+  For example, I added endpoints to set and get the servo position, left and right speeds of the robot car
+  as well as end point to take and save an image for training with YOLO8
+
+  By Giang T. Dang
+  04 Nov 2023, Christchurch, New Zealand 
 *********/
 
 #include "esp_camera.h"
@@ -26,8 +35,6 @@ typedef struct {
 // Replace with your network credentials
 // const char* ssid = "your_ssid";
 // const char* password = "your_pass";
-const char* ssid = "SPARK-B315-DB3F";
-const char* password = "A2DJG680N80";
 
 #define PART_BOUNDARY "123456789000000000000987654321"
 
@@ -153,8 +160,9 @@ Servo servoN2;
 Servo myServo;
 
 int leftSpeed = 195;
-int rightSpeed = 205;
-int minSpeed = 185;
+int rightSpeed = 195;
+int speedDiff = 15;
+int minSpeed = 195;
 int maxSpeed = 255;
 int speedStep = 10;
 
@@ -352,7 +360,7 @@ static esp_err_t cmd_handler(httpd_req_t *req){
   
   if(!strcmp(variable, "forward")) {
     Serial.println("Forward");
-    analogWrite(MOTOR_1_PIN_1, leftSpeed);
+    analogWrite(MOTOR_1_PIN_1, leftSpeed - speedDiff);
     analogWrite(MOTOR_1_PIN_2, 0);
     analogWrite(MOTOR_2_PIN_1, rightSpeed);
     analogWrite(MOTOR_2_PIN_2, 0);
@@ -828,6 +836,19 @@ static size_t jpg_encode_stream(void * arg, size_t index, const void* data, size
     return len;
 }
 
+// void updateVar(varName; int updateVal; int minVal; int maxVal) {
+//   // int servoValue =  atoi(var_value);
+//   if (updateVal > maxVal){
+//     varName = maxVal;
+//     Serial.println("Maximum limit has been reached");
+//   } else if (updateVal < minVal){
+//     varName = minServoPos;
+//     Serial.println("Minimum limit has been reached");
+//   } else {
+//     varName = updateVal;
+//   };
+
+// }
 
 void loop() {
   // Serial.println(leftSpeed);
