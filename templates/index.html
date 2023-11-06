@@ -11,34 +11,36 @@
         margin: 0px auto;
         padding-top: 30px;
       }
-
-      .variable-label {
-        display: flex;
-        align-items: center;
-        text-align: left;
-        margin: 0;
-        color: #2640c3;
-        font-size: 18px;
+      /* Styles regarding the image elements*/
+      #image-container {
+        position: relative;
+        display: inline-block;
       }
-      .button {
-        background-color: #2f4468;
-        border: none;
-        color: white;
-        text-align: center;
-        text-decoration: none;
-        display: flex;
-        font-size: 18px;
-        padding: 10px 20px;
-        margin: 0 10px;
-        cursor: pointer;
+      /* Image to load the stream video served by the ESP32 CAM */
+      img {
+        width: auto;
+        max-width: 100%;
+        height: auto;
+      }
+      /* style of the bounding boxes around the detected objects*/
+      .bounding-box {
+        position: absolute;
+        border: 4px solid;
+      }
+      /* style to hide the bounding boxes of the previous frames */
+      .hidden {
+        display: none;
+      }
+      /* Styles regarding the image elements*/
+
+      /* Styles of the functional elements*/
+      /* go-buttons are used to move the robot car in different directions */
+      .go-button-container {
+        display: grid;
+        margin: 50px 20px;
         justify-content: center;
-        -webkit-touch-callout: none;
-        -webkit-user-select: none;
-        -khtml-user-select: none;
-        -moz-user-select: none;
-        -ms-user-select: none;
-        user-select: none;
-        -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+        gap: 0;
+        grid-template-columns: 150px 150px 150px;
       }
       .go-button {
         background-color: #26a1c3;
@@ -58,64 +60,63 @@
         user-select: none;
         -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
       }
-      .varInput {
-        display: flex;
-        background-color: #ffffff;
-        /* border: 2px solid #00aaff; */
-        /* width: 50 px;
-        height: 20 px; */
-        /* font-size: 15 px; */
-        color: #ff0000;
-        padding: 0 3px;
-        margin: 0 3px;
-        justify-content: center;
-      }
-      img {
-        width: auto;
-        max-width: 100%;
-        height: auto;
-      }
-      /* Style the bounding box */
-      .bounding-box {
-        position: absolute;
-        /* border-width: 2px; */
-        border: 4px solid;
-        /* box-sizing: border-box; */
-      }
-      #image-container {
-        position: relative;
-        display: inline-block;
-      }
-      .hidden {
-        display: none;
-      }
-      .go-button-container {
-        display: grid;
-        margin: 50px 20px;
-        justify-content: center;
-        gap: 0;
 
-        /* Define grid templates for each row */
-        grid-template-columns: 150px 150px 150px;
-      }
+      /* process-buttons are used to process images taken by the camera 
+      and change the car control modes
+       */
       .process-button-container {
         display: grid;
         gap: 10px 5px;
         margin: 50px 20px;
         justify-content: center;
-
-        /* Define grid templates for each row */
         grid-template-columns: 250px 250px 250px;
       }
+
+      .process-button {
+        background-color: #2f4468;
+        border: none;
+        color: white;
+        text-align: center;
+        text-decoration: none;
+        display: flex;
+        font-size: 18px;
+        padding: 10px 20px;
+        margin: 0 10px;
+        cursor: pointer;
+        justify-content: center;
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        -khtml-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+        -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+      }
+      /*variable are the parameters of the motor speed and the servo position*/
       .variable-container {
         display: grid;
         gap: 10px 10px;
         margin: 50px auto;
         justify-content: center;
-
-        /* Define grid templates for each row */
         grid-template-columns: 300px 50px 50px 50px;
       }
+      .variable-label {
+        display: flex;
+        align-items: center;
+        text-align: left;
+        margin: 0;
+        color: #2640c3;
+        font-size: 18px;
+      }
+      .varInput {
+        display: flex;
+        background-color: #ffffff;
+        color: #ff0000;
+        padding: 0 3px;
+        margin: 0 3px;
+        justify-content: center;
+      }
+      /* Styles of the functional elements*/
     </style>
   </head>
   <body>
@@ -125,6 +126,7 @@
       <img src="" id="photo" />
     </div>
     <div class="go-button-container">
+      <!-- toggleCheckbox will make 'get' requests to the ESP32 CAM  see below-->
       <button
         class="go-button"
         onmousedown="toggleCheckbox('veerLeft');"
@@ -208,54 +210,65 @@
       </button>
     </div>
     <div class="process-button-container">
-      <button class="button" id="btnPredict">Predict Once</button>
-      <button class="button" id="btnStreamPrediction">Stream Prediction</button>
-      <button class="button" id="btnStopStreamPrediction">
+      <button class="process-button" id="btnPredict">Predict Once</button>
+      <button class="process-button" id="btnStreamPrediction">
+        Stream Prediction
+      </button>
+      <button class="process-button" id="btnStopStreamPrediction">
         Stop Stream Prediction
       </button>
-      <button class="button" id="btnTakePhoto">Take & Save a Photo</button>
-      <button class="button" id="btnRunAuto">Run Auto</button>
-      <button class="button" id="btnStopRunAuto">Stop Running Auto</button>
+      <button class="process-button" id="btnTakePhoto">
+        Take & Save a Photo
+      </button>
+      <button class="process-button" id="btnRunAuto">Run Auto</button>
+      <button class="process-button" id="btnStopRunAuto">
+        Stop Running Auto
+      </button>
     </div>
     <div class="variable-container">
       <label class="variable-label"> Left Speed: Min 195 Max 255</label>
-      <button class="button" id="btnLeftSpeedDecrease">-</button>
+      <button class="process-button" id="btnLeftSpeedDecrease">-</button>
       <input
         class="varInput"
         type="text"
         id="iptLeftSpeed"
         value="{{leftSpeed}}"
       />
-      <button class="button" id="btnLeftSpeedIncrease">+</button>
+      <button class="process-button" id="btnLeftSpeedIncrease">+</button>
       <label class="variable-label"> Right Speed: Min 195 Max 255</label>
-      <button class="button" id="btnRightSpeedDecrease">-</button>
+      <button class="process-button" id="btnRightSpeedDecrease">-</button>
       <input
         class="varInput"
         type="text"
         id="iptRightSpeed"
         value="{{rightSpeed}}"
       />
-      <button class="button" id="btnRightSpeedIncrease">+</button>
+      <button class="process-button" id="btnRightSpeedIncrease">+</button>
       <label class="variable-label"> Servo Pos: L(+) Max 155 R(-) Min 95</label>
-      <button class="button" id="btnServoLeft">+</button>
+      <button class="process-button" id="btnServoLeft">+</button>
       <input
         class="varInput"
         type="text"
         id="iptServoPos"
         value="{{servoPos}}"
       />
-      <button class="button" id="btnServoRight">-</button>
+      <button class="process-button" id="btnServoRight">-</button>
     </div>
 
     <script>
+      // this is the original function make requests to the ESP32 camera to
+      // move the robot car,
+      // enablePredict was added later because sometimes there is a need to predict
+      // after the movement sometimes there is not (to save processing time)
       function toggleCheckbox(x, enablePredict = true) {
         var xhr = new XMLHttpRequest();
         xhr.open("GET", "http://192.168.1.65/action?go=" + x, true);
         xhr.send();
-        //if (!streamPredictionEnable) setTimeout(predictOnce, 100);
         if (enablePredict) setTimeout(predictOnce, 50);
+        // predict after 50 ms the request is sent, 50 ms is a fine tuned parameter
+        // to ensure good performance
       }
-
+      // this function is added later to be able to set the value
       function toggleSetValue(x, y) {
         var xhr = new XMLHttpRequest();
         xhr.open(
@@ -264,7 +277,6 @@
           true
         );
         xhr.send();
-        //if (!streamPredictionEnable) setTimeout(predictOnce, 100);
       }
 
       function changeInput(strESP32EndPoint, strFlaskEndPoint, strIptID) {
@@ -377,7 +389,7 @@
         "Veer Left",
         "Veer Right",
         "Decelarate and Veer Left",
-        "Decelarate and Veer Left",
+        "Decelarate and Veer Right",
         "Reverse Left",
         "Reverse Right",
         "Backward",
