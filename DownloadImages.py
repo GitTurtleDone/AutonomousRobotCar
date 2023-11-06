@@ -22,11 +22,11 @@ dirContents = os.listdir(saveFolderPath)
 files = [item for item in dirContents if os.path.isfile(os.path.join(saveFolderPath, item))]
 # set the image_counter by counting all the files in the folder to be saved to
 imageCounter = len(files) + 1
-servoPos = "120"
+servoPos = "115"
 leftSpeed = "195"
-rightSpeed = "195"
+rightSpeed = "205"
 
-model = YOLO('./runs/detect/train14/weights/best.pt')
+model = YOLO('./runs/detect/train14py/weights/best.pt')
 
 @app.route('/')
 def index():
