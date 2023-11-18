@@ -289,3 +289,6 @@ Model summary (fused): 168 layers, 11130228 parameters, 0 gradients, 28.5 GFLOPs
 Speed: 0.8ms preprocess, 3.1ms inference, 0.0ms loss, 1.0ms postprocess per image
 Results saved to runs/detect/train14
 (tf) giang@ELECPG082:~/Programming/Embedded/AutonomousRobotCar$ 
+
+link good demonstration:
+https://1drv.ms/v/s!AlaWtcl_fxVxgdYYfbki7HwNhS39og?e=Dzk9Tt

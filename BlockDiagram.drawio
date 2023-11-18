@@ -1,0 +1,136 @@
+<mxfile host="app.diagrams.net" modified="2023-11-09T20:12:18.845Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36" etag="ip3rqpMoWPQPnRUYatIv" version="22.0.8" type="device">
+  <diagram name="Page-1" id="gX4B-ul-j7ffA8FJ_Yqc">
+    <mxGraphModel dx="1928" dy="915" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="pKRXwaA7IKuHfNfY8nI0-2" value="" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="320" y="70" width="240" height="310" as="geometry" />
+        </mxCell>
+        <mxCell id="pKRXwaA7IKuHfNfY8nI0-3" value="&lt;div style=&quot;&quot;&gt;&lt;span style=&quot;font-size: 24px; font-weight: bold; background-color: initial;&quot;&gt;Desktop or laptop&lt;/span&gt;&lt;/div&gt;&lt;font style=&quot;&quot;&gt;&lt;div style=&quot;text-align: left;&quot;&gt;&lt;span style=&quot;background-color: initial;&quot;&gt;hosting the flask app, the web page, python, YOLO8, etc.&lt;/span&gt;&lt;/div&gt;&lt;font style=&quot;font-size: 12px;&quot;&gt;&lt;div style=&quot;text-align: left;&quot;&gt;&lt;span style=&quot;background-color: initial;&quot;&gt;providing resource to predict the images (GPU, for example)&lt;/span&gt;&lt;/div&gt;&lt;/font&gt;&lt;div style=&quot;text-align: left;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;/font&gt;" style="text;strokeColor=none;align=center;fillColor=none;html=1;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
+          <mxGeometry x="350" y="970" width="395" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="pKRXwaA7IKuHfNfY8nI0-4" value="" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="40" y="610" width="310" height="470" as="geometry" />
+        </mxCell>
+        <mxCell id="pKRXwaA7IKuHfNfY8nI0-5" value="" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="490" y="610" width="320" height="350" as="geometry" />
+        </mxCell>
+        <mxCell id="pKRXwaA7IKuHfNfY8nI0-6" value="&lt;div style=&quot;text-align: center;&quot;&gt;&lt;b style=&quot;background-color: initial;&quot;&gt;&lt;font style=&quot;font-size: 24px;&quot;&gt;A web interface&lt;/font&gt;&lt;/b&gt;&lt;/div&gt;providing an interface to control the car movements and the driving modes by making requests and consuming the endpoints served by the ESP32 CAM and the python flask app&lt;br&gt;&lt;br&gt;A) Image: rendering images served by the ESP32 CAM stream and predicted bounding boxes&lt;br&gt;&lt;br&gt;B) Go-buttons: moving the car manually in different directions&lt;br&gt;&lt;br&gt;C) Process-buttons:&lt;br&gt;&lt;ol&gt;&lt;li&gt;Predict Once: take and save a photo into the computer request the /predict endpoint from the flask application to get the bounding boxes coordinates, and finally return command to control the robot car.&lt;/li&gt;&lt;li&gt;Stream Predictions: perform multiple Predict Onces in a while loop&lt;/li&gt;&lt;li&gt;Stop Streaming Prediction: stop the while loop&lt;/li&gt;&lt;li&gt;Take &amp;amp; Save a Photo: into a local folder for trainging a YOLOv8 model&lt;/li&gt;&lt;li&gt;Run Auto: run the car in the autonomous mode&lt;/li&gt;&lt;li&gt;Stop Running Auto: stop the autonomous mode&lt;/li&gt;&lt;/ol&gt;D) Input fields: getting and setting the servo positions, left/right speeds.&amp;nbsp;&amp;nbsp;" style="text;strokeColor=none;align=left;fillColor=none;html=1;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
+          <mxGeometry x="50" y="620" width="290" height="440" as="geometry" />
+        </mxCell>
+        <mxCell id="pKRXwaA7IKuHfNfY8nI0-7" value="&lt;div style=&quot;text-align: center;&quot;&gt;&lt;b style=&quot;font-size: 24px; background-color: initial;&quot;&gt;A python flask app&lt;/b&gt;&lt;/div&gt;&amp;nbsp;&lt;br&gt;A) Serving:&lt;br&gt;&lt;ol&gt;&lt;li&gt;/download: to download and save images for YOLOv8 to either train the model or to predict bounding boxes when running the robot car&amp;nbsp;&lt;/li&gt;&lt;li&gt;/predict: to predict bounding boxes around the empty space in front of the robot car and other detected objects&lt;/li&gt;&lt;li&gt;/getServopos, /getLeftSpeed, /getRightSpeed: to get the corresponding values from the ESP32 CAM *&lt;/li&gt;&lt;/ol&gt;B) Rendering the web interface view&amp;nbsp;" style="text;strokeColor=none;align=left;fillColor=none;html=1;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
+          <mxGeometry x="500" y="630" width="290" height="240" as="geometry" />
+        </mxCell>
+        <mxCell id="pKRXwaA7IKuHfNfY8nI0-8" value="" style="shape=flexArrow;endArrow=classic;startArrow=classic;html=1;rounded=0;entryX=0.25;entryY=1;entryDx=0;entryDy=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;" parent="1" source="pKRXwaA7IKuHfNfY8nI0-4" target="pKRXwaA7IKuHfNfY8nI0-2" edge="1">
+          <mxGeometry width="100" height="100" relative="1" as="geometry">
+            <mxPoint x="190" y="600" as="sourcePoint" />
+            <mxPoint x="410" y="400" as="targetPoint" />
+            <Array as="points" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pKRXwaA7IKuHfNfY8nI0-10" value="" style="endArrow=none;dashed=1;html=1;rounded=0;" parent="1" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="830" y="40" as="sourcePoint" />
+            <mxPoint x="20" y="40" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pKRXwaA7IKuHfNfY8nI0-12" value="" style="fontColor=#0066CC;verticalAlign=top;verticalLabelPosition=bottom;labelPosition=center;align=center;html=1;outlineConnect=0;fillColor=#CCCCCC;strokeColor=#6881B3;gradientColor=none;gradientDirection=north;strokeWidth=2;shape=mxgraph.networks.wireless_modem;" parent="1" vertex="1">
+          <mxGeometry x="375" y="430" width="100" height="85" as="geometry" />
+        </mxCell>
+        <mxCell id="pKRXwaA7IKuHfNfY8nI0-13" value="&lt;div style=&quot;&quot;&gt;&lt;span style=&quot;background-color: initial;&quot;&gt;&lt;font style=&quot;font-size: 24px;&quot;&gt;&lt;b&gt;ESP32 CAM&amp;nbsp;&lt;/b&gt;&lt;/font&gt;&lt;/span&gt;&lt;/div&gt;&lt;div style=&quot;text-align: left;&quot;&gt;&lt;span style=&quot;background-color: initial;&quot;&gt;A) Serving endpoints:&lt;/span&gt;&lt;/div&gt;&lt;span style=&quot;background-color: initial;&quot;&gt;&lt;div style=&quot;&quot;&gt;&lt;ol&gt;&lt;li style=&quot;text-align: left;&quot;&gt;&lt;span style=&quot;background-color: initial;&quot;&gt;&amp;nbsp;/stream:&amp;nbsp;&lt;/span&gt;&lt;/li&gt;&lt;li style=&quot;text-align: left;&quot;&gt;&lt;span style=&quot;background-color: initial;&quot;&gt;&amp;nbsp;/action?go=&lt;/span&gt;forward, backward, etc...,&amp;nbsp;&lt;span style=&quot;background-color: initial;&quot;&gt;takeAPhoto, increase(or decrease) leftSpeed (rightSpeed, servoPos)&lt;/span&gt;&lt;/li&gt;&lt;li style=&quot;text-align: left;&quot;&gt;&lt;span style=&quot;background-color: initial;&quot;&gt;/set?name=xxx&amp;amp;value=yyy with xxx = leftSpeed (or rightSpeed or ServoPos) and yyy = the correspoding values&lt;/span&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/div&gt;&lt;/span&gt;&lt;div style=&quot;text-align: left;&quot;&gt;&lt;span style=&quot;background-color: initial;&quot;&gt;B) Controlling:&lt;/span&gt;&lt;/div&gt;&lt;blockquote style=&quot;margin: 0 0 0 40px; border: none; padding: 0px;&quot;&gt;&lt;div style=&quot;text-align: left;&quot;&gt;&lt;ol&gt;&lt;li&gt;&lt;span style=&quot;background-color: initial;&quot;&gt;Motor driver&lt;/span&gt;&lt;/li&gt;&lt;li&gt;&lt;span style=&quot;background-color: initial;&quot;&gt;Servo&lt;/span&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/div&gt;&lt;/blockquote&gt;" style="text;strokeColor=none;align=center;fillColor=none;html=1;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
+          <mxGeometry x="335" y="70" width="210" height="310" as="geometry" />
+        </mxCell>
+        <mxCell id="mBdyRwYLK4VbUBGjvMa3-3" value="" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="60" y="150" width="200" height="150" as="geometry" />
+        </mxCell>
+        <mxCell id="mBdyRwYLK4VbUBGjvMa3-4" value="&lt;div style=&quot;text-align: left;&quot;&gt;&lt;br&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="630" y="140" width="180" height="160" as="geometry" />
+        </mxCell>
+        <mxCell id="mBdyRwYLK4VbUBGjvMa3-7" value="" style="shape=flexArrow;endArrow=classic;html=1;rounded=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;" parent="1" source="pKRXwaA7IKuHfNfY8nI0-2" edge="1" target="mBdyRwYLK4VbUBGjvMa3-3">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="225" y="345" as="sourcePoint" />
+            <mxPoint x="220" y="255" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="mBdyRwYLK4VbUBGjvMa3-8" value="" style="shape=flexArrow;endArrow=classic;startArrow=classic;html=1;rounded=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" target="pKRXwaA7IKuHfNfY8nI0-5" edge="1">
+          <mxGeometry width="100" height="100" relative="1" as="geometry">
+            <mxPoint x="350" y="785" as="sourcePoint" />
+            <mxPoint x="420" y="830" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="mBdyRwYLK4VbUBGjvMa3-9" value="" style="shape=flexArrow;endArrow=classic;startArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.002;entryY=0.536;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" target="mBdyRwYLK4VbUBGjvMa3-4" edge="1" source="pKRXwaA7IKuHfNfY8nI0-2">
+          <mxGeometry width="100" height="100" relative="1" as="geometry">
+            <mxPoint x="560" y="220" as="sourcePoint" />
+            <mxPoint x="610" y="220" as="targetPoint" />
+            <Array as="points" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="mBdyRwYLK4VbUBGjvMa3-11" value="" style="shape=flexArrow;endArrow=classic;startArrow=classic;html=1;rounded=0;entryX=0.75;entryY=1;entryDx=0;entryDy=0;" parent="1" target="pKRXwaA7IKuHfNfY8nI0-2" edge="1">
+          <mxGeometry width="100" height="100" relative="1" as="geometry">
+            <mxPoint x="660" y="610" as="sourcePoint" />
+            <mxPoint x="880" y="410" as="targetPoint" />
+            <Array as="points" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CAA0rCauCF_97mvGmM48-2" value="&lt;br&gt;&lt;div style=&quot;text-align: center; border-color: var(--border-color);&quot;&gt;&lt;font style=&quot;border-color: var(--border-color); font-size: 24px;&quot;&gt;&lt;b style=&quot;border-color: var(--border-color);&quot;&gt;Servo&lt;/b&gt;&lt;/font&gt;&lt;/div&gt;&lt;div style=&quot;border-color: var(--border-color);&quot;&gt;&lt;span style=&quot;border-color: var(--border-color); background-color: initial;&quot;&gt;A) Receiving commands from the ESP32 CAM and rotating accordingly&lt;/span&gt;&lt;/div&gt;&lt;div style=&quot;border-color: var(--border-color);&quot;&gt;&lt;span style=&quot;border-color: var(--border-color); background-color: initial;&quot;&gt;B) Changing the&lt;/span&gt;&lt;/div&gt;&lt;div style=&quot;border-color: var(--border-color);&quot;&gt;&lt;span style=&quot;border-color: var(--border-color); background-color: initial;&quot;&gt;directions of the CAM, hence, changing images seen by the CAM&lt;/span&gt;&lt;/div&gt;" style="text;strokeColor=none;align=left;fillColor=none;html=1;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="650" y="140" width="140" height="150" as="geometry" />
+        </mxCell>
+        <mxCell id="CAA0rCauCF_97mvGmM48-4" value="" style="endArrow=none;dashed=1;html=1;rounded=0;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="830" y="420" as="sourcePoint" />
+            <mxPoint x="20" y="420" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CAA0rCauCF_97mvGmM48-5" value="" style="endArrow=none;dashed=1;html=1;rounded=0;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="830" y="580" as="sourcePoint" />
+            <mxPoint x="20" y="580" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CAA0rCauCF_97mvGmM48-6" value="" style="endArrow=none;dashed=1;html=1;rounded=0;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="830" y="1090" as="sourcePoint" />
+            <mxPoint x="20" y="1090" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CAA0rCauCF_97mvGmM48-7" value="" style="endArrow=none;dashed=1;html=1;rounded=0;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="830" y="1090" as="sourcePoint" />
+            <mxPoint x="830" y="580" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CAA0rCauCF_97mvGmM48-8" value="" style="endArrow=none;dashed=1;html=1;rounded=0;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="20" y="1090" as="sourcePoint" />
+            <mxPoint x="20" y="579.5" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CAA0rCauCF_97mvGmM48-9" value="" style="endArrow=none;dashed=1;html=1;rounded=0;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="20" y="420" as="sourcePoint" />
+            <mxPoint x="20" y="40" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CAA0rCauCF_97mvGmM48-10" value="" style="endArrow=none;dashed=1;html=1;rounded=0;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="830" y="420" as="sourcePoint" />
+            <mxPoint x="830" y="40" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CAA0rCauCF_97mvGmM48-11" value="&lt;div style=&quot;&quot;&gt;&lt;span style=&quot;background-color: initial;&quot;&gt;&lt;span style=&quot;font-size: 24px;&quot;&gt;&lt;b&gt;Wi-fi&amp;nbsp;&lt;/b&gt;&lt;/span&gt;&lt;/span&gt;&lt;b style=&quot;background-color: initial; font-size: 24px;&quot;&gt;modem&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;text-align: left;&quot;&gt;&lt;span style=&quot;background-color: initial;&quot;&gt;providing connections between the&lt;/span&gt;&lt;/div&gt;&lt;div style=&quot;text-align: left;&quot;&gt;&lt;span style=&quot;background-color: initial;&quot;&gt;ESP32 CAM and the computer&lt;/span&gt;&lt;/div&gt;" style="text;strokeColor=none;align=center;fillColor=none;html=1;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="325" y="505" width="220" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="CAA0rCauCF_97mvGmM48-12" value="&lt;div style=&quot;&quot;&gt;&lt;span style=&quot;font-size: 24px; font-weight: bold; background-color: initial;&quot;&gt;The robot car&lt;/span&gt;&lt;/div&gt;" style="text;strokeColor=none;align=center;fillColor=none;html=1;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="110" y="310" width="170" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="CAA0rCauCF_97mvGmM48-13" value="&lt;div style=&quot;text-align: center;&quot;&gt;&lt;b style=&quot;font-size: 24px; background-color: initial; border-color: var(--border-color);&quot;&gt;Motor driver&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;border-color: var(--border-color);&quot;&gt;receiving commands from the ESP32 CAM and moving the car accordingly&lt;/div&gt;" style="text;strokeColor=none;align=left;fillColor=none;html=1;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="75" y="170" width="170" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="CAA0rCauCF_97mvGmM48-14" value="&lt;div style=&quot;text-align: center;&quot;&gt;&lt;/div&gt;&lt;br&gt;&lt;span style=&quot;background-color: initial;&quot;&gt;* In the initial stage of development, somehow direct request from the web interface were met with CORS errors&lt;/span&gt;" style="text;strokeColor=none;align=left;fillColor=none;html=1;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="510" y="870" width="290" height="60" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

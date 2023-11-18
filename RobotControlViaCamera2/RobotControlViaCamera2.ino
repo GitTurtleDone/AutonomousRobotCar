@@ -1,5 +1,4 @@
 /*********
-  
   I started using Rui Santos's 
   Complete instructions at: https://randomnerdtutorials.com/esp32-cam-car-robot-web-server/
   and his book at https://RandomNerdTutorials.com/esp32-cam-projects-ebook/
@@ -12,7 +11,15 @@
   as well as end point to take and save an image for training with YOLO8
 
   By Giang T. Dang
-  04 Nov 2023, Christchurch, New Zealand 
+  18 Nov 2023, Christchurch, New Zealand 
+*********/
+
+/*********
+  Rui Santos
+  Complete instructions at https://RandomNerdTutorials.com/esp32-cam-projects-ebook/
+  
+  Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files.
+  The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 *********/
 
 #include "esp_camera.h"
@@ -35,6 +42,8 @@ typedef struct {
 // Replace with your network credentials
 // const char* ssid = "your_ssid";
 // const char* password = "your_pass";
+const char* ssid = "SPARK-B315-DB3F";
+const char* password = "A2DJG680N80";
 
 #define PART_BOUNDARY "123456789000000000000987654321"
 
@@ -149,7 +158,7 @@ typedef struct {
 #define MOTOR_2_PIN_2    15
 
 #define servoPin 2
-int servoPos = 115;
+int servoPos = 120;
 int minServoPos = 75;
 int maxServoPos = 155; 
 int servoStep = 10;
@@ -214,13 +223,7 @@ static const char PROGMEM INDEX_HTML[] = R"rawliteral(
       <tr><td colspan="3" align="center"><button class="button" onmousedown="toggleCheckbox('forward');" ontouchstart="toggleCheckbox('forward');" onmouseup="toggleCheckbox('stop');" ontouchend="toggleCheckbox('stop');">Forward</button></td></tr>
       <tr><td align="center"><button class="button" onmousedown="toggleCheckbox('left');" ontouchstart="toggleCheckbox('left');" onmouseup="toggleCheckbox('stop');" ontouchend="toggleCheckbox('stop');">Left</button></td><td align="center"><button class="button" onmousedown="toggleCheckbox('stop');" ontouchstart="toggleCheckbox('stop');">Stop</button></td><td align="center"><button class="button" onmousedown="toggleCheckbox('right');" ontouchstart="toggleCheckbox('right');" onmouseup="toggleCheckbox('stop');" ontouchend="toggleCheckbox('stop');">Right</button></td></tr>
       <tr><td colspan="3" align="center"><button class="button" onmousedown="toggleCheckbox('backward');" ontouchstart="toggleCheckbox('backward');" onmouseup="toggleCheckbox('stop');" ontouchend="toggleCheckbox('stop');">Backward</button></td></tr>                 
-      <!-- Add an <a> element with an initially empty href -->
-      // <a id="saveButton" href="" download="" style="display: none;">
-      //   <button>Save Image</button>
-      // </a>
-
-      
-      
+      <!-- Add an <a> element with an initially empty href -->      
     </table>
    
    <!-- Add an <img> element to load the image -->
@@ -231,19 +234,8 @@ static const char PROGMEM INDEX_HTML[] = R"rawliteral(
       xhr.open("GET", "/action?go=" + x, true);
       xhr.send();
     }
-    //window.onload = 
-    
     window.onload = function() {
-      // var saveButton = document.getElementById("saveButton");
-      // var imgElement = document.querySelector("img");
-
-      // imgElement.onload = function() {
-      //   // Set the dynamically generated href attribute
-      //   saveButton.href = window.location.href.slice(0, -1) + "/action?go=takePhoto";
-      //   saveButton.style.display = "block";
-      // };
       document.getElementById("photo").src = window.location.href.slice(0, -1) + ":81/stream";
-      //document.getElementById("caputuredPhoto").src = window.location.href.slice(0, -1) + "/action?go=takePhoto";
     };
   </script>
   </body>
@@ -425,41 +417,6 @@ static esp_err_t cmd_handler(httpd_req_t *req){
   
   else if(!strcmp(variable, "takePhoto")) {
     Serial.println("Take a photo");
-    // fb = esp_camera_fb_get();
-    // if (!fb) {
-    //   Serial.println("Camera capture failed");
-    //   res = ESP_FAIL;
-    // } else {
-    //   res =ESP_FAIL;
-    //   if(fb->width > 400){
-    //     if(fb->format != PIXFORMAT_JPEG){
-    //       bool jpeg_converted = frame2jpg(fb, 80, &_jpg_buf, &_jpg_buf_len);
-    //       Serial.println("JPEG compression failed");
-    //       res = ESP_FAIL;
-    //     } else {
-    //       _jpg_buf_len = fb->len;
-    //       _jpg_buf = fb->buf;
-    //     }
-    //   }
-    // }
-    // if(res == ESP_OK){
-    //   size_t hlen = snprintf((char *)part_buf, 64, _STREAM_PART, _jpg_buf_len);
-    //   res = httpd_resp_send_chunk(req, (const char *)part_buf, hlen);
-    // }
-    // if(res == ESP_OK){
-    //   res = httpd_resp_send_chunk(req, (const char *)_jpg_buf, _jpg_buf_len);
-    // }
-    // if(res == ESP_OK){
-    //   res = httpd_resp_send_chunk(req, _STREAM_BOUNDARY, strlen(_STREAM_BOUNDARY));
-    // }
-    // if(fb){
-    //   esp_camera_fb_return(fb);
-    //   fb = NULL;
-    //   _jpg_buf = NULL;
-    // } else if(_jpg_buf){
-    //   free(_jpg_buf);
-    //   _jpg_buf = NULL;
-    // }
     //----------------------------
     fb = esp_camera_fb_get();
     if (!fb) {
@@ -487,11 +444,6 @@ static esp_err_t cmd_handler(httpd_req_t *req){
     int64_t fr_end = esp_timer_get_time();
     ESP_LOGI(TAG, "JPG: %uKB %ums", (uint32_t)(fb_len/1024), (uint32_t)((fr_end - fr_start)/1000));
     return res;
-    
-    //photoTaken = false;
-    //startCameraServer();
-    //----------------------------
-    
   }
 
   else if(!strcmp(variable, "leftSpeedIncrease")) {
@@ -598,30 +550,11 @@ static esp_err_t cmd_handler(httpd_req_t *req){
   return httpd_resp_send(req, NULL, 0);
 }
 
-
 static esp_err_t set_handler(httpd_req_t *req){
   char*  buf;
   size_t buf_len;
   char var_name[32] = {0,};
-  char var_value[4] = {0,};
-  //esp_err_t res = httpd_req_recv(req, &buf, HTTPD_REQ_DATA, 0);
- 
-  //int value;
-  // if (res == ESP_OK) {
-  //     buf_len = httpd_req_get_url_query_len(req) + 1;
-  //     if (buf_len > 1) {
-  //         if (httpd_query_key_value(buf, "value", buf, buf_len) == ESP_OK) {
-  //             value = atoi(buf);
-  //             variableToUpdate = value;
-  //             httpd_resp_send(req, "Variable updated", -1);
-  //             return ESP_OK;
-  //         }
-  //     }
-  // }
-
-  // httpd_resp_send_404(req);
-  // return ESP_FAIL;
-  
+  char var_value[4] = {0,};  
   buf_len = httpd_req_get_url_query_len(req) + 1;
   if (buf_len > 1) {
     buf = (char*)malloc(buf_len);
@@ -836,22 +769,6 @@ static size_t jpg_encode_stream(void * arg, size_t index, const void* data, size
     return len;
 }
 
-// void updateVar(varName; int updateVal; int minVal; int maxVal) {
-//   // int servoValue =  atoi(var_value);
-//   if (updateVal > maxVal){
-//     varName = maxVal;
-//     Serial.println("Maximum limit has been reached");
-//   } else if (updateVal < minVal){
-//     varName = minServoPos;
-//     Serial.println("Minimum limit has been reached");
-//   } else {
-//     varName = updateVal;
-//   };
-
-// }
-
 void loop() {
-  // Serial.println(leftSpeed);
-  // delay(1000);
   
 }
