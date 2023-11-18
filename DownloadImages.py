@@ -6,12 +6,6 @@ from io import BytesIO
 from ultralytics import YOLO
 import os
 
-
-# image_url = "http://192.168.1.64/action?go=takePhoto"
-# response = requests.get(image_url)
-# img = Image.open(BytesIO(response.content))
-# img = img.save("CNN.jpg")
-
 app = Flask(__name__)
 
 # Initialize a global variables
@@ -22,11 +16,11 @@ dirContents = os.listdir(saveFolderPath)
 files = [item for item in dirContents if os.path.isfile(os.path.join(saveFolderPath, item))]
 # set the image_counter by counting all the files in the folder to be saved to
 imageCounter = len(files) + 1
-servoPos = "115"
+servoPos = "120"
 leftSpeed = "195"
 rightSpeed = "205"
 
-model = YOLO('./runs/detect/train14py/weights/best.pt')
+
 
 @app.route('/')
 def index():
@@ -54,18 +48,20 @@ def download_image():
     imageCounter += 1
 
     return "Image downloaded and saved as " + filename
+
+
+model = YOLO('./runs/detect/train14/weights/best.pt')
+
 @app.route('/predict', methods=['POST'])
 def predictImage():
     global model
     image_url = "http://192.168.1.65/action?go=takePhoto"
     response = requests.get(image_url)
     img = Image.open(BytesIO(response.content))
-
     # Generate the filename using the counter
     filename = f"./PredictedImages/image.jpg"
     img.save(filename)
     result = model.predict(source="./PredictedImages/image.jpg", classes=None, conf=0.5)
-
     # return bboxes, the last line contains coordinates in percentage
     return ([result[0].boxes.cls.cpu().numpy().tolist(),
             result[0].boxes.conf.cpu().numpy().tolist(),

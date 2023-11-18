@@ -268,121 +268,6 @@
         // predict after 50 ms the request is sent, 50 ms is a fine tuned parameter
         // to ensure good performance
       }
-      // this function is added later to be able to set the speeds and servo position values
-      function toggleSetValue(x, y) {
-        var xhr = new XMLHttpRequest();
-        xhr.open(
-          "POST",
-          "http://192.168.1.65/set?name=" + x + "&value=" + y,
-          true
-        );
-        xhr.send();
-      }
-
-      /*
-      An abstract function to add an event listener to send requests to the python flask server, 
-      which, in turn, sends a request to the ESP32 CAM server to increase/decrease the
-      values of speeds and servo position and update the values in the input fields
-      these detour routes were selected to avoid CORS errors, although they are not yet optimal 
-      */
-      function requestESP32nFlask(
-        strBtnID,
-        strESP32EndPoint,
-        strFlaskEndPoint,
-        strIptID,
-        enablePredict = false
-      ) {
-        document
-          .getElementById(strBtnID)
-          .addEventListener("click", function () {
-            toggleCheckbox(strESP32EndPoint, enablePredict);
-            var xhr = new XMLHttpRequest();
-            xhr.open("POST", "/" + strFlaskEndPoint, true);
-            xhr.setRequestHeader(
-              "Content-Type",
-              "application/x-www-form-urlencoded"
-            );
-            xhr.onreadystatechange = function () {
-              if (xhr.readyState === 4 && xhr.status === 200) {
-                document.getElementById(strIptID).value = xhr.responseText;
-              }
-            };
-            xhr.send();
-          });
-      }
-      // Im plementations of the abstract functions requestESP32nFlask
-      requestESP32nFlask(
-        "btnLeftSpeedDecrease",
-        "leftSpeedDecrease",
-        "getLeftSpeed",
-        "iptLeftSpeed",
-        false
-      );
-      requestESP32nFlask(
-        "btnLeftSpeedIncrease",
-        "leftSpeedIncrease",
-        "getLeftSpeed",
-        "iptLeftSpeed",
-        false
-      );
-      requestESP32nFlask(
-        "btnRightSpeedDecrease",
-        "rightSpeedDecrease",
-        "getRightSpeed",
-        "iptRightSpeed",
-        false
-      );
-      requestESP32nFlask(
-        "btnRightSpeedIncrease",
-        "rightSpeedIncrease",
-        "getRightSpeed",
-        "iptRightSpeed",
-        false
-      );
-      requestESP32nFlask(
-        "btnServoLeft",
-        "servoLeft",
-        "getServoPos",
-        "iptServoPos",
-        true
-      );
-      requestESP32nFlask(
-        "btnServoRight",
-        "servoRight",
-        "getServoPos",
-        "iptServoPos",
-        true
-      );
-      // Im plementations of the abstract functions requestESP32nFlask end
-
-      // Functions to change and update the values of speeds and servo position
-      function updateInput(strFlaskEndPoint, strIptID) {
-        var xhr = new XMLHttpRequest();
-        xhr.open("POST", "/" + strFlaskEndPoint, true);
-        xhr.setRequestHeader(
-          "Content-Type",
-          "application/x-www-form-urlencoded"
-        );
-        xhr.onreadystatechange = function () {
-          if (xhr.readyState === 4 && xhr.status === 200) {
-            document.getElementById(strIptID).value = xhr.responseText;
-          }
-        };
-        xhr.send();
-      }
-      function changeInput(strESP32EndPoint, strFlaskEndPoint, strIptID) {
-        const inputField = document.getElementById(strIptID);
-        inputField.addEventListener("change", function () {
-          let inputValue = inputField.value;
-          console.log(inputValue);
-          toggleSetValue(strESP32EndPoint, inputValue);
-          updateInput(strFlaskEndPoint, strIptID);
-        });
-      }
-      changeInput("setLeftSpeed", "getLeftSpeed", "iptLeftSpeed");
-      changeInput("setRightSpeed", "getRightSpeed", "iptRightSpeed");
-      changeInput("setServoPos", "getServoPos", "iptServoPos");
-      // Functions to change and update the values of speeds and servo position end
 
       // Main functions to control the robot car in Run Auto Mode
 
@@ -542,8 +427,8 @@
               if (maxEmptyBBox[2] >= ableToMoveWidth)
                 returnMessage =
                   maxEmptyBBox[0] >= 50 ? alertMessage[6] : alertMessage[5];
-              // Decelerate and Veer Right if the empty space is on the right
-              // Decelerate and Veer Left if the empty space is on the left
+              // Decelerate and Veer Right if the empty space is on the Right
+              // Decelerate and Veer Left if the empty space is on the Left
             }
           } else {
             // if the height of the empty space is too small
@@ -551,10 +436,10 @@
               //if the width of the empty space is large enough
               returnMessage =
                 maxEmptyBBox[0] >= 50 ? alertMessage[7] : alertMessage[8];
-              // Reverse Left if the empty space is on the right
-              // Reverese Right if the empty space is on the left
+              // Reverse Left if the empty space is on the Right
+              // Reverese Right if the empty space is on the Left
             } else {
-              // not receiving
+              // Receiving > 3 continuous Stops command -> Backward
               conStopNum++;
               if (conStopNum > 3) {
                 returnMessage = alertMessage[9];
@@ -583,7 +468,6 @@
         );
         xhr.onreadystatechange = function () {
           if (xhr.readyState === 4 && xhr.status === 200) {
-            //console.log(xhr.response);
             bboxes = JSON.parse(xhr.response);
             returnInfo = processBB(bboxes);
             console.log(`predicted Once: ${returnInfo}`);
@@ -757,12 +641,134 @@
         loopIteration();
       }
 
+      // this function is added later to be able to set the speeds and servo position values
+      function toggleSetValue(x, y) {
+        var xhr = new XMLHttpRequest();
+        xhr.open(
+          "POST",
+          "http://192.168.1.65/set?name=" + x + "&value=" + y,
+          true
+        );
+        xhr.send();
+      }
+
+      /*
+      An abstract function to add an event listener to send requests to the python flask server, 
+      which, in turn, sends a request to the ESP32 CAM server to increase/decrease the
+      values of speeds and servo position and update the values in the input fields
+      these detour routes were selected to avoid CORS errors, although they are not yet optimal 
+      */
+      function requestESP32nFlask(
+        strBtnID,
+        strESP32EndPoint,
+        strFlaskEndPoint,
+        strIptID,
+        enablePredict = false
+      ) {
+        document
+          .getElementById(strBtnID)
+          .addEventListener("click", function () {
+            toggleCheckbox(strESP32EndPoint, enablePredict);
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "/" + strFlaskEndPoint, true);
+            xhr.setRequestHeader(
+              "Content-Type",
+              "application/x-www-form-urlencoded"
+            );
+            xhr.onreadystatechange = function () {
+              if (xhr.readyState === 4 && xhr.status === 200) {
+                document.getElementById(strIptID).value = xhr.responseText;
+              }
+            };
+            xhr.send();
+          });
+      }
+      // Im plementations of the abstract functions requestESP32nFlask
+      requestESP32nFlask(
+        "btnLeftSpeedDecrease",
+        "leftSpeedDecrease",
+        "getLeftSpeed",
+        "iptLeftSpeed",
+        false
+      );
+      requestESP32nFlask(
+        "btnLeftSpeedIncrease",
+        "leftSpeedIncrease",
+        "getLeftSpeed",
+        "iptLeftSpeed",
+        false
+      );
+      requestESP32nFlask(
+        "btnRightSpeedDecrease",
+        "rightSpeedDecrease",
+        "getRightSpeed",
+        "iptRightSpeed",
+        false
+      );
+      requestESP32nFlask(
+        "btnRightSpeedIncrease",
+        "rightSpeedIncrease",
+        "getRightSpeed",
+        "iptRightSpeed",
+        false
+      );
+      requestESP32nFlask(
+        "btnServoLeft",
+        "servoLeft",
+        "getServoPos",
+        "iptServoPos",
+        true
+      );
+      requestESP32nFlask(
+        "btnServoRight",
+        "servoRight",
+        "getServoPos",
+        "iptServoPos",
+        true
+      );
+      // Im plementations of the abstract functions requestESP32nFlask end
+
+      // Functions to change and update the values of speeds and servo position
+      function updateInput(strFlaskEndPoint, strIptID) {
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", "/" + strFlaskEndPoint, true);
+        xhr.setRequestHeader(
+          "Content-Type",
+          "application/x-www-form-urlencoded"
+        );
+        xhr.onreadystatechange = function () {
+          if (xhr.readyState === 4 && xhr.status === 200) {
+            document.getElementById(strIptID).value = xhr.responseText;
+          }
+        };
+        xhr.send();
+      }
+      function changeInput(strESP32EndPoint, strFlaskEndPoint, strIptID) {
+        const inputField = document.getElementById(strIptID);
+        inputField.addEventListener("change", function () {
+          let inputValue = inputField.value;
+          console.log(inputValue);
+          toggleSetValue(strESP32EndPoint, inputValue);
+          updateInput(strFlaskEndPoint, strIptID);
+        });
+      }
+      changeInput("setLeftSpeed", "getLeftSpeed", "iptLeftSpeed");
+      changeInput("setRightSpeed", "getRightSpeed", "iptRightSpeed");
+      changeInput("setServoPos", "getServoPos", "iptServoPos");
+      // Functions to change and update the values of speeds and servo position end
+
+      // actions on loading the browser.
       window.onload = async function () {
+        //get the stream of images taken by the robot car.
         const camImage = document.getElementById("photo");
+
+        // set the speeds and servo position of the robot car
         await updateInput("getLeftSpeed", "iptLeftSpeed");
         await updateInput("getRightSpeed", "iptRightSpeed");
         await updateInput("getServoPos", "iptServoPos");
         camImage.src = "http://192.168.1.65:81/stream";
+
+        // perform one prediction.
         await predictOnce();
       };
     </script>
