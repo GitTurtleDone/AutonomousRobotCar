@@ -1,5 +1,8 @@
 AutonomousRobotCar is a project to build a robot car that can run autonomously.
 
+## Links showing how the robot car works
+It can be seen [here](https://www.linkedin.com/posts/%C4%91%E1%BA%B7ng-th%C3%A1i-giang-bb310340_ai-yolov8-computervision-activity-7126664408121962496-bGsd?utm_source=share&utm_medium=member_desktop&rcm=ACoAAAiO5vcBqf3YVcKG_i1IJQjrfMFMpJlsKhQ) 
+
 ## Hardware
 
 - ESP32 CAM. I bought mine from [here] (https://www.aliexpress.com/item/1005003804757059.html?spm=a2g0o.order_list.order_list_main.5.4a1d1802VfxSE3)
